@@ -1,21 +1,15 @@
 package openbank
 
 type (
-	API struct {
-		Url         string
-		Method      string
-		ServiceName string
-	}
-
 	BaseInput struct {
-		OrganizationName string `json:"organizationName"`
-		Username         string `json:"username"`
-		Password         string `json:"password"`
-		IvKey            string `json:"ivKey"`
-		SessionKey       string `json:"sessionKey"`
-		Url              string `json:"url"`
-		RegisterNo       string `json:"registerNo"`
-		ClientID         string `json:"clientId"`
+		OrganizationName string `json:"organizationName"` // Бүртгүүлсэн байгууллагын нэр
+		Username         string `json:"username"`         // Хэрэглэгчийн нэр
+		Password         string `json:"password"`         // Нууц үг
+		IvKey            string `json:"ivKey"`            // IV key
+		SessionKey       string `json:"sessionKey"`       // Session key
+		Url              string `json:"url"`              // URL
+		RegisterNo       string `json:"registerNo"`       // Бүртгүүлсэн байгууллагын дугаар
+		ClientID         string `json:"clientId"`         // Хэрэглэгчийн ID
 	}
 	AuthReq struct {
 		Name     string `json:"name"`

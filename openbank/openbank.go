@@ -26,7 +26,7 @@ type Openbank interface {
 	Statement(body StatementReq) (*StatementResp, error)                // Харилцах дансны хуулга харах
 	AccountList(body AccountListReq) (*AccountListResp, error)          // Дансны жагсаалт татах
 	AccountTypeInq(body AccountTypeInqReq) (*AccountTypeInqResp, error) // Дансны төрөл шалгах
-	AccountBalcInq(body AccountBalcInqReq) (*AccountBalcInqResp, error) // Дансны төлөв шалгах
+	AccountBalcInq(body AccountBalcInqReq) (*AccountBalcInqResp, error) // Дансны үдэгдэл шалгах
 	UtilityRateInq() (*RateResp, error)                                 // Ханшны мэдээлэл авах
 }
 
