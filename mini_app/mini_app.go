@@ -2,9 +2,8 @@ package mini_app
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 
-	"github.com/techpartners-asia/golomt-api-go/utils"
 	"resty.dev/v3"
 )
 
@@ -44,7 +43,7 @@ func (s *socialPayMiniApp) GetUserInfo(token string) (*UserInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	encryptedToken, err := utils.EncryptRSA(string(bodyJson), s.base64PublicKey)
+	encryptedToken, err := generateGolomtSignature(string(bodyJson), s.base64PublicKey)
 	if err != nil {
 		return nil, err
 	}
@@ -58,8 +57,9 @@ func (s *socialPayMiniApp) GetUserInfo(token string) (*UserInfo, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(res.String())
 	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+		return nil, fmt.Errorf("error: %s", res.String())
 	}
 	return response, nil
 }

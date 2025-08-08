@@ -74,3 +74,34 @@ func DecryptRSA(cipherText string, base64PrivateKey string) (string, error) {
 
 	return string(decryptedBytes), nil
 }
+
+// EncryptRSA_PKCS1 encrypts plain data using RSA/ECB/PKCS1Padding (same as Java default)
+// publicKeyBase64 should be a Base64-encoded X.509 public key (DER format)
+func EncryptRSA_PKCS1(data string, publicKeyBase64 string) (string, error) {
+	// Decode Base64 public key to DER bytes
+	pubKeyBytes, err := base64.StdEncoding.DecodeString(publicKeyBase64)
+	if err != nil {
+		return "", err
+	}
+
+	// Parse public key (X.509 format)
+	pubInterface, err := x509.ParsePKIXPublicKey(pubKeyBytes)
+	if err != nil {
+		return "", err
+	}
+
+	pubKey, ok := pubInterface.(*rsa.PublicKey)
+	if !ok {
+		return "", errors.New("not a valid RSA public key")
+	}
+
+	// Encrypt using PKCS1 v1.5 padding (same as Java's Cipher.ENCRYPT_MODE + "RSA/ECB/PKCS1Padding")
+	encryptedBytes, err := rsa.EncryptPKCS1v15(rand.Reader, pubKey, []byte(data))
+	if err != nil {
+		return "", err
+	}
+
+	// Encode to Base64
+	encryptedBase64 := base64.StdEncoding.EncodeToString(encryptedBytes)
+	return encryptedBase64, nil
+}
