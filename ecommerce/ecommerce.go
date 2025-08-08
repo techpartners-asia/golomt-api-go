@@ -176,9 +176,9 @@ func (g *golomtEcommerce) CreateInvoice(input CreateInvoiceInput) (*CreateInvoic
 	if res.IsError() {
 		return nil, errors.New(res.Error().(string))
 	}
-	if response.ErrorCode != "000" {
-		return nil, fmt.Errorf("%s", response.ErrorDesc)
-	}
+	// if response.ErrorCode != "000" {
+	// 	return nil, fmt.Errorf("%s", response.ErrorDesc)
+	// }
 	// Verify checksum
 	expectedChecksum := utils.GenerateHMAC(g.secret, utils.AppendAsString(
 		response.Invoice,
