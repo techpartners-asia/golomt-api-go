@@ -2,7 +2,7 @@ package mini_app
 
 type (
 	UserInfo struct {
-		IndividualId   string `json:"individualId"`   // Хэрэглэгчийн дугаар
+		IndividualId   int64  `json:"individualId"`   // Хэрэглэгчийн дугаар
 		RegisterNumber string `json:"registerNumber"` // Регистрийн дугаар
 		LastName       string `json:"lastName"`       // Овог
 		FirstName      string `json:"firstName"`      // Нэр

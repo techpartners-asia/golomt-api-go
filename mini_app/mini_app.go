@@ -3,8 +3,11 @@ package mini_app
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"strings"
 
-	"resty.dev/v3"
+	"github.com/techpartners-asia/golomt-api-go/utils"
 )
 
 type socialPayMiniApp struct {
@@ -33,33 +36,43 @@ func New(baseUrl, clientId, base64PublicKey string) SocialPayMiniApp {
 // token: example: 1234567890
 // return: UserInfo
 func (s *socialPayMiniApp) GetUserInfo(token string) (*UserInfo, error) {
-	client := resty.New()
-	defer client.Close()
-	var response *UserInfo
-	body := map[string]interface{}{
-		"token": token,
-	}
-	bodyJson, err := json.Marshal(body)
+	jsonPayload := `{"token":"` + token + `"}` // store payload as string
+	payload := strings.NewReader(jsonPayload)  // create reader from string
+	encryptedToken, err := utils.EncryptRSA(jsonPayload, s.base64PublicKey)
+
 	if err != nil {
 		return nil, err
 	}
-	encryptedToken, err := generateGolomtSignature(string(bodyJson), s.base64PublicKey)
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodPost, s.baseUrl+"/utility/miniapp/token/check?language=mn", payload)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
-	res, err := client.R().
-		SetHeader("Content-Type", "application/json").
-		SetHeader("X-Golomt-Signature", encryptedToken).
-		SetHeader("X-Golomt-Client-Id", s.clientId).
-		SetBody(body).
-		SetResult(&response). // or SetResult(LoginResponse{}).
-		Post(s.baseUrl + "/utility/miniapp/token/check?language=mn")
+
+	req.Header.Add("X-Golomt-Signature", encryptedToken)
+	req.Header.Add("X-Golomt-Cert-Id", s.clientId)
+	req.Header.Add("Content-Type", "application/json")
+
+	res, err := client.Do(req)
 	if err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
-	fmt.Println(res.String())
-	if res.IsError() {
-		return nil, fmt.Errorf("error: %s", res.String())
+	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
 	}
+
+	response := &UserInfo{}
+	err = json.Unmarshal(body, response)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
 	return response, nil
 }
