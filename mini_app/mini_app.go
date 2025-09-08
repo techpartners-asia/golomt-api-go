@@ -19,6 +19,7 @@ type socialPayMiniApp struct {
 
 type SocialPayMiniApp interface {
 	GetUserInfo(token string) (*UserInfo, error)
+	SendNotification(input SendNotificationInput) error
 }
 
 // New creates a new SocialPayMiniApp instance
