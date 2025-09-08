@@ -13,7 +13,7 @@ type (
 	}
 
 	SendNotificationInput struct {
-		IndividualId int64  `json:"individualId"`
+		IndividualId string `json:"individualId"`
 		MessageTitle string `json:"messageTitle"`
 		MessageText  string `json:"messageText"`
 		VIEW_ID      string `json:"VIEW_ID"`
