@@ -2,6 +2,7 @@ package mini_app
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -43,6 +44,7 @@ func (s *socialPayMiniApp) GetUserInfo(token string) (*UserInfo, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	client := &http.Client{}
 	req, err := http.NewRequest(http.MethodPost, s.baseUrl+"/utility/miniapp/token/check?language=mn", payload)
 	if err != nil {
@@ -75,4 +77,53 @@ func (s *socialPayMiniApp) GetUserInfo(token string) (*UserInfo, error) {
 	}
 
 	return response, nil
+}
+
+func (s *socialPayMiniApp) SendNotification(input SendNotificationInput) error {
+
+	payload, err := json.Marshal(input)
+	if err != nil {
+		return err
+	}
+
+	stringPayload := string(payload)
+
+	jsonPayload := strings.NewReader(stringPayload)
+
+	encryptedToken, err := utils.EncryptRSA(stringPayload, s.base64PublicKey)
+	if err != nil {
+		return err
+	}
+
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodPost, s.baseUrl+"/utility/notification/push?language=mn", jsonPayload)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("X-Golomt-Signature", encryptedToken)
+	req.Header.Add("X-Golomt-Cert-Id", s.clientId)
+
+	res, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+
+	response := &SendNotificationResponse{}
+	err = json.Unmarshal(body, response)
+	if err != nil {
+		return err
+	}
+
+	if response.Message != "Амжилттай" {
+		return errors.New(response.Message)
+	}
+
+	return nil
 }
