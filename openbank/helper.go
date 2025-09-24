@@ -9,13 +9,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+
+	"github.com/techpartners-asia/golomt-api-go/openbank/model"
 )
 
-//	func hashKey(key string) string {
-//		h := sha256.New()
-//		io.WriteString(h, key)
-//		return fmt.Sprintf("%x", h.Sum(nil))
-//	}
 func PKCS7Pad(data []byte, blockSize int) []byte {
 	padding := blockSize - len(data)%blockSize
 	padText := bytes.Repeat([]byte{byte(padding)}, padding)
@@ -80,6 +77,7 @@ func (g openbank) DecryptAESCBC(ciphertext string) (string, error) {
 	return string(unpaddedData), nil
 }
 
+// Checksum (X–Golomt–Checksum) үүсгэх
 func (o openbank) bodyChecksum(body interface{}) (string, error) {
 	jsonBody, err := json.Marshal(body)
 	if err != nil {
@@ -94,7 +92,7 @@ func (o openbank) bodyChecksum(body interface{}) (string, error) {
 	return checkSum, nil
 }
 
-func convertResponse[T any](response []byte, decryptFunc func(string) (string, error)) (T, error) {
+func parseResponse[T any](response []byte, decryptFunc func(string) (string, error)) (T, error) {
 	var result T
 	responseData, err := decryptFunc(string(response))
 	if err != nil {
@@ -102,4 +100,16 @@ func convertResponse[T any](response []byte, decryptFunc func(string) (string, e
 	}
 	err = json.Unmarshal([]byte(responseData), &result)
 	return result, err
+}
+
+// Харилцагч АМЖИЛТТАЙ нэвтэрсэн үед гуравдагч системийн тус сервисийн
+// хариуг хүлээж авахаар өгөгдсөн Redirect URL авто дуудагдана.
+// Тухайн хариу дээрх утгуудыг хүлээж авах функц
+func ParseOathResponse(response []byte) (*model.OAuthResp, error) {
+	var result *model.OAuthResp
+	err := json.Unmarshal(response, &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
