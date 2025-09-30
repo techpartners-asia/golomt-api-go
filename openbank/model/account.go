@@ -103,8 +103,6 @@ type (
 		IsSocialPayConnected string `json:"isSocialPayConnected"`
 		// Дансны төрөл
 		AccountType AccountType `json:"accountType"`
-		// Бүтээгдэхүүний төрөл
-		SchemeType string `json:"schemeType"`
 	}
 
 	AccountType struct {
@@ -321,36 +319,7 @@ type (
 		Value float64 `json:"value"`
 		// Валют
 		Currency string `json:"currency"`
-	}
-
-	RateReq struct {
-		// Валют
-		Currency string `json:"currency"`
-	}
-	RateResp struct {
-		// Хүсэлтийн дугаар
-		RequestID string `json:"requestId"`
-		// Өдрийн огноо
-		Date string `json:"date"`
-		// Дарааллын дугаар
-		Sequence int `json:"sequence"`
-		// Валютүүд
-		Currencies []RateData `json:"currencies"`
-	}
-	RateData struct {
-		// Хүсэлтийн дугаар
-		RequestID string `json:"requestId"`
-		// Валют код
-		CurrencyCode string `json:"currencyCode"`
-		// Валют нэр
-		CurrencyName string `json:"currencyName"`
-		// Бэлэн ханш авах
-		CashValueSell string `json:"cashValueSell"`
-		// Бэлэн ханш зарах
-		CashValueBuy string `json:"cashValueBuy"`
-		// Бэлэн бус ханш авах
-		NonCashValueSell string `json:"nonCashValueSell"`
-		// Бэлэн бус ханш зарах
-		NonCashValueBuy string `json:"nonCashValueBuy"`
+		// Шилжүүлэг хийх банкны код буюу Голомт банк (15) байна. Лавлах төрөл: BANK
+		Bank string `json:"bank"`
 	}
 )

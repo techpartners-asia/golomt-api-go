@@ -90,7 +90,7 @@ func (o openbank) ServicesAccess(body model.ServiceListReq) (*model.ServiceListR
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(body).
 		SetResult(&response).
 		Post(o.url + "/v1/auth/services/access")
@@ -98,13 +98,13 @@ func (o openbank) ServicesAccess(body model.ServiceListReq) (*model.ServiceListR
 		return nil, err
 	}
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG statement response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.ServiceListResp](response, o.DecryptAESCBC)
+	return parseEncryptedResponse[*model.ServiceListResp](response, o.DecryptAESCBC)
 }
 
 // 4.5.	Бүртгэлтэй дугаар татах
@@ -126,7 +126,7 @@ func (o openbank) GetPhone() (*model.GetPhoneResp, error) {
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetQueryParams(map[string]string{
 			"clientId": o.clientID,
 			"state":    o.state,
@@ -138,13 +138,13 @@ func (o openbank) GetPhone() (*model.GetPhoneResp, error) {
 		return nil, err
 	}
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG statement response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.GetPhoneResp](response, o.DecryptAESCBC)
+	return parseEncryptedResponse[*model.GetPhoneResp](response, o.DecryptAESCBC)
 }
 
 // 4.6.	Бүртгэлтэй дугаар руу OTP код илгээх
@@ -166,7 +166,7 @@ func (o openbank) OTPSend(phone string) (*model.OTPSendResp, error) {
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetQueryParams(map[string]string{
 			"clientId": o.clientID,
 			"state":    o.state,
@@ -181,13 +181,13 @@ func (o openbank) OTPSend(phone string) (*model.OTPSendResp, error) {
 		return nil, err
 	}
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG statement response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.OTPSendResp](response, o.DecryptAESCBC)
+	return parseEncryptedResponse[*model.OTPSendResp](response, o.DecryptAESCBC)
 }
 
 // 4.7.	OTP шалгах
@@ -209,7 +209,7 @@ func (o openbank) OTPVerify(body model.OTPVerifyReq) (*model.OTPVerifyResp, erro
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(body).
 		SetResult(&response).
 		Post(o.url + "/v1/auth/authorize/otp")
@@ -217,13 +217,13 @@ func (o openbank) OTPVerify(body model.OTPVerifyReq) (*model.OTPVerifyResp, erro
 		return nil, err
 	}
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG statement response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.OTPVerifyResp](response, o.DecryptAESCBC)
+	return parseEncryptedResponse[*model.OTPVerifyResp](response, o.DecryptAESCBC)
 }
 
 // 4.8.	ХУР систем OTP илгээх
@@ -245,7 +245,7 @@ func (o openbank) XypOTPSend() (*model.OTPSendResp, error) {
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetQueryParams(map[string]string{
 			"clientId": o.clientID,
 			"state":    o.state,
@@ -257,13 +257,13 @@ func (o openbank) XypOTPSend() (*model.OTPSendResp, error) {
 		return nil, err
 	}
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG statement response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.OTPSendResp](response, o.DecryptAESCBC)
+	return parseEncryptedResponse[*model.OTPSendResp](response, o.DecryptAESCBC)
 }
 
 // 4.9.	ХУР систем OTP шалгах
@@ -285,7 +285,7 @@ func (o openbank) XypOTPVerify(body model.OTPXypVerifyReq) (*model.OTPVerifyResp
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(body).
 		SetResult(&response).
 		Post(o.url + "/v1/auth/xyp/otp")
@@ -293,13 +293,13 @@ func (o openbank) XypOTPVerify(body model.OTPXypVerifyReq) (*model.OTPVerifyResp
 		return nil, err
 	}
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG statement response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.OTPVerifyResp](response, o.DecryptAESCBC)
+	return parseEncryptedResponse[*model.OTPVerifyResp](response, o.DecryptAESCBC)
 }
 
 // 4.10. Тоон гарын үсгээр баталгаажуулах
@@ -321,7 +321,7 @@ func (o openbank) DigitalSignature() (*model.DigitalSignatureResp, error) {
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetQueryParams(map[string]string{
 			"clientId": o.clientID,
 			"state":    o.state,
@@ -333,11 +333,11 @@ func (o openbank) DigitalSignature() (*model.DigitalSignatureResp, error) {
 		return nil, err
 	}
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG statement response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.DigitalSignatureResp](response, o.DecryptAESCBC)
+	return parseEncryptedResponse[*model.DigitalSignatureResp](response, o.DecryptAESCBC)
 }

@@ -9,7 +9,7 @@ import (
 )
 
 // 7.1.	Хот, аймагийн жагсаалт авах
-func (o *openbank) StateListInq(body model.StateListReq) (*model.StateListResp, error) {
+func (o openbank) StateListInq(body model.StateListReq) ([]model.StateListResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -26,25 +26,29 @@ func (o *openbank) StateListInq(body model.StateListReq) (*model.StateListResp, 
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(body).
-		SetResult(&response).
 		Post(o.url + "/v1/utility/state/inq")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		if len(response) == 0 {
+			return nil, fmt.Errorf("%s-Golomt CG utility area list inq response: %s", time.Now().Format("20060102150405"), res.Status())
+		}
+		errResp, err := parseResponse[*model.ErrorResp](response)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG utility area list inq response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.StateListResp](response, o.DecryptAESCBC)
+	fmt.Println(response)
+	return parseResponse[[]model.StateListResp](response)
 }
 
 // 7.2.	Сум, дүүргийн жагсаалт авах
-func (o *openbank) DistrictListInq(body model.DistrictListReq) (*model.DistrictListResp, error) {
+func (o openbank) DistrictListInq(body model.DistrictListReq) ([]model.DistrictListResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -61,25 +65,28 @@ func (o *openbank) DistrictListInq(body model.DistrictListReq) (*model.DistrictL
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(body).
-		SetResult(&response).
 		Post(o.url + "/v1/utility/city/inq")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		if len(response) == 0 {
+			return nil, fmt.Errorf("%s-Golomt CG utility district list inq response: %s", time.Now().Format("20060102150405"), res.Status())
+		}
+		errResp, err := parseResponse[*model.ErrorResp](response)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG utility district list inq response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.DistrictListResp](response, o.DecryptAESCBC)
+	return parseResponse[[]model.DistrictListResp](response)
 }
 
 // 7.3.	Категори төрлөөр сонголтын жагсаалт авах
-func (o *openbank) CategoryListInq(body model.CategoryReq) (*model.CategoryResp, error) {
+func (o openbank) CategoryListInq(body model.CategoryReq) (*model.CategoryResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -96,25 +103,28 @@ func (o *openbank) CategoryListInq(body model.CategoryReq) (*model.CategoryResp,
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(body).
-		SetResult(&response).
 		Post(o.url + "/v1/utility/category/inq")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		if len(response) == 0 {
+			return nil, fmt.Errorf("%s-Golomt CG utility category list inq response: %s", time.Now().Format("20060102150405"), res.Status())
+		}
+		errResp, err := parseResponse[*model.ErrorResp](response)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG utility category list inq response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.CategoryResp](response, o.DecryptAESCBC)
+	return parseResponse[*model.CategoryResp](response)
 }
 
 // 7.4.	Ханшны мэдээлэл авах
-func (o *openbank) RateInq(body model.RateReq) (*model.RateResp, error) {
+func (o openbank) RateInq(body model.RateReq) (*model.RateResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -132,25 +142,28 @@ func (o *openbank) RateInq(body model.RateReq) (*model.RateResp, error) {
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
 		SetBody(body).
-		SetResult(&response).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		Post(o.url + "/v1/utility/rate/inq")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		if len(response) == 0 {
+			return nil, fmt.Errorf("%s-Golomt CG utility rate inq response: %s", time.Now().Format("20060102150405"), res.Status())
+		}
+		errResp, err := parseResponse[*model.ErrorResp](response)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG utility rate inq response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.RateResp](response, o.DecryptAESCBC)
+	return parseResponse[*model.RateResp](response)
 }
 
 // 7.5.	Салбарын жагсаалт авах
-func (o *openbank) BranchListInq(body model.BranchListReq) (*model.BranchListResp, error) {
+func (o openbank) BranchListInq(body model.BranchListReq) ([]model.BranchListResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -167,25 +180,28 @@ func (o *openbank) BranchListInq(body model.BranchListReq) (*model.BranchListRes
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(body).
-		SetResult(&response).
 		Post(o.url + "/v1/utility/sol/inq")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		if len(response) == 0 {
+			return nil, fmt.Errorf("%s-Golomt CG utility branch list inq response: %s", time.Now().Format("20060102150405"), res.Status())
+		}
+		errResp, err := parseResponse[*model.ErrorResp](response)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG utility branch list inq response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.BranchListResp](response, o.DecryptAESCBC)
+	return parseResponse[[]model.BranchListResp](response)
 }
 
 // 7.6.	Бүтээгдэхүүн лавлах
-func (o *openbank) ProductListInq(body model.ProductListReq) (*[]model.ProductData, error) {
+func (o openbank) ProductListInq(body model.ProductListReq) ([]model.ProductData, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -202,22 +218,22 @@ func (o *openbank) ProductListInq(body model.ProductListReq) (*[]model.ProductDa
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(body).
-		SetResult(&response).
 		Post(o.url + "/v1/utility/product/category/inq")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		if len(response) == 0 {
 			return nil, fmt.Errorf("%s-Golomt CG utility product list inq response: %s", time.Now().Format("20060102150405"), res.Status())
 		}
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		errResp, err := parseResponse[*model.ErrorResp](response)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG utility product list inq response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*[]model.ProductData](response, o.DecryptAESCBC)
+	return parseResponse[[]model.ProductData](response)
 }

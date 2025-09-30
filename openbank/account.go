@@ -27,8 +27,8 @@ func (o openbank) AccountBalcInq(body model.AccountBalcInqReq) (*model.AccountBa
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
-		SetBody(body).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
+		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
 			"clientId": o.clientID,
 			"state":    o.state,
@@ -40,13 +40,13 @@ func (o openbank) AccountBalcInq(body model.AccountBalcInqReq) (*model.AccountBa
 		return nil, err
 	}
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG account balance inq response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.AccountBalcInqResp](response, o.DecryptAESCBC)
+	return parseEncryptedResponse[*model.AccountBalcInqResp](response, o.DecryptAESCBC)
 }
 
 // 5.2.	Дансны төрөл шалгах
@@ -68,21 +68,21 @@ func (o openbank) AccountTypeInq(body model.AccountTypeInqReq) (*model.AccountTy
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
-		SetBody(body).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
+		SetBody(bodyReader(body)).
 		SetResult(&response).
 		Post(o.url + "/v1/account/type/inq")
 	if err != nil {
 		return nil, err
 	}
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG account type inq response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.AccountTypeInqResp](response, o.DecryptAESCBC)
+	return parseEncryptedResponse[*model.AccountTypeInqResp](response, o.DecryptAESCBC)
 }
 
 // 5.3.	Дансны товч нэр солих
@@ -104,21 +104,21 @@ func (o openbank) AccountRename(body model.AccountRenameReq) (*model.AccountRena
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
-		SetBody(body).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
+		SetBody(bodyReader(body)).
 		SetResult(&response).
 		Post(o.url + "/v1/account/rename")
 	if err != nil {
 		return nil, err
 	}
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG account rename response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.AccountRenameResp](response, o.DecryptAESCBC)
+	return parseEncryptedResponse[*model.AccountRenameResp](response, o.DecryptAESCBC)
 }
 
 // 5.4.	Харилцах дансны дэлгэрэнгүй мэдээлэл харах
@@ -140,26 +140,26 @@ func (o openbank) AccountDetail(body model.AccountDetailReq) (*model.AccountDeta
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetQueryParams(map[string]string{
 			"clientId": o.clientID,
 			"state":    o.state,
 			"scope":    o.scope,
 		}).
-		SetBody(body).
+		SetBody(bodyReader(body)).
 		SetResult(&response).
 		Post(o.url + "/v1/account/operative/details")
 	if err != nil {
 		return nil, err
 	}
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG account detail response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.AccountDetailResp](response, o.DecryptAESCBC)
+	return parseEncryptedResponse[*model.AccountDetailResp](response, o.DecryptAESCBC)
 }
 
 // 5.5.	Харилцах дансны хуулга харах
@@ -181,26 +181,29 @@ func (o openbank) AccountStatement(body model.StatementReq) (*model.StatementRes
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
-		SetBody(body).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
+		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
 			"clientId": o.clientID,
 			"state":    o.state,
 			"scope":    o.scope,
 		}).
-		SetResult(&response).
 		Post(o.url + "/v1/account/operative/statement/")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		if len(response) == 0 {
+			return nil, fmt.Errorf("%s-Golomt CG statement response: %s", time.Now().Format("20060102150405"), res.Status())
+		}
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG statement response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.StatementResp](response, o.DecryptAESCBC)
+	return parseEncryptedResponse[*model.StatementResp](response, o.DecryptAESCBC)
 }
 
 // 5.6.	Харилцах данс нээх
@@ -222,26 +225,26 @@ func (o openbank) AccountAdd(body model.AccountAddReq) (*model.AccountAddResp, e
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetQueryParams(map[string]string{
 			"clientId": o.clientID,
 			"state":    o.state,
 			"scope":    o.scope,
 		}).
-		SetBody(body).
+		SetBody(bodyReader(body)).
 		SetResult(&response).
 		Post(o.url + "/v1/account/operative/add")
 	if err != nil {
 		return nil, err
 	}
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG account add response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.AccountAddResp](response, o.DecryptAESCBC)
+	return parseEncryptedResponse[*model.AccountAddResp](response, o.DecryptAESCBC)
 }
 
 // 5.7.	 Хадгаламжийн дансны дэлгэрэнгүй
@@ -263,8 +266,8 @@ func (o openbank) AccountDepositDetail(body model.AccountDetailReq) (*model.Acco
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
-		SetBody(body).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
+		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
 			"clientId": o.clientID,
 			"state":    o.state,
@@ -276,13 +279,13 @@ func (o openbank) AccountDepositDetail(body model.AccountDetailReq) (*model.Acco
 		return nil, err
 	}
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG account deposit detail response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.AccountDepositDetailResp](response, o.DecryptAESCBC)
+	return parseEncryptedResponse[*model.AccountDepositDetailResp](response, o.DecryptAESCBC)
 }
 
 // 5.8.	Хадгаламжийн дансны хуулга харах
@@ -305,8 +308,8 @@ func (o openbank) AccountDepositStatement(body model.StatementReq) (*model.Accou
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
-		SetBody(body).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
+		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
 			"clientId": o.clientID,
 			"state":    o.state,
@@ -318,13 +321,13 @@ func (o openbank) AccountDepositStatement(body model.StatementReq) (*model.Accou
 		return nil, err
 	}
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG account deposit statement response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.AccountAddResp](response, o.DecryptAESCBC)
+	return parseEncryptedResponse[*model.AccountAddResp](response, o.DecryptAESCBC)
 }
 
 // 5.9.	Хадгаламжийн данс нээх
@@ -346,21 +349,21 @@ func (o openbank) AccountDepositAdd(body model.AccountDepositAddReq) (*model.Acc
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
-		SetBody(body).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
+		SetBody(bodyReader(body)).
 		SetResult(&response).
 		Post(o.url + "/v1/account/deposit/add")
 	if err != nil {
 		return nil, err
 	}
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG account deposit add response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.AccountAddResp](response, o.DecryptAESCBC)
+	return parseEncryptedResponse[*model.AccountAddResp](response, o.DecryptAESCBC)
 }
 
 // 5.10. Дансны жагсаалт татах
@@ -382,26 +385,29 @@ func (o openbank) AccountList(body model.AccountListReq) (*model.AccountListResp
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
-		SetBody(body).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
+		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
 			"clientId": o.clientID,
 			"state":    o.state,
 			"scope":    o.scope,
 		}).
-		SetResult(&response).
 		Post(o.url + "/v1/account/list")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		if len(response) == 0 {
+			return nil, fmt.Errorf("%s-Golomt CG account list response: %s", time.Now().Format("20060102150405"), res.Status())
+		}
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG account list response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.AccountListResp](response, o.DecryptAESCBC)
+	return parseEncryptedResponse[*model.AccountListResp](response, o.DecryptAESCBC)
 }
 
 // 5.11.a Данс эзэмшигчнийн мэдээллэл авах /Голомт/
@@ -423,26 +429,26 @@ func (o openbank) AccountCustomerDetail(body model.AccountCustomerDetailReq) (*m
 			}
 			return checksum
 		}()).
-		SetHeader("Authorization", o.authObject.Token).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetQueryParams(map[string]string{
 			"clientId": o.clientID,
 			"state":    o.state,
 			"scope":    o.scope,
 		}).
-		SetBody(body).
+		SetBody(bodyReader(body)).
 		SetResult(&response).
 		Post(o.url + "/v1/account/customer/detail")
 	if err != nil {
 		return nil, err
 	}
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG account customer detail response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.AccountCustomerDetailResp](response, o.DecryptAESCBC)
+	return parseEncryptedResponse[*model.AccountCustomerDetailResp](response, o.DecryptAESCBC)
 }
 
 // 5.11.b Данс эзэмшигчнийн мэдээллэл авах /Голомт бус/
@@ -469,19 +475,19 @@ func (o openbank) AccountOtherBankCustomerDetail(body model.AccountCustomerDetai
 			"state":    o.state,
 			"scope":    o.scope,
 		}).
-		SetHeader("Authorization", o.authObject.Token).
-		SetBody(body).
+		SetHeader("Authorization", "Bearer "+o.authObject.Token).
+		SetBody(bodyReader(body)).
 		SetResult(&response).
 		Post(o.url + "/v1/account/customer/detail")
 	if err != nil {
 		return nil, err
 	}
 	if res.StatusCode() != 200 {
-		errResp, err := parseResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s-Golomt CG account customer detail response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseResponse[*model.AccountOtherBankCustomerDetailResp](response, o.DecryptAESCBC)
+	return parseEncryptedResponse[*model.AccountOtherBankCustomerDetailResp](response, o.DecryptAESCBC)
 }

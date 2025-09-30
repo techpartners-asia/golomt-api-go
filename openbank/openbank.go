@@ -16,6 +16,7 @@ type openbank struct {
 	registerNo       string
 	expireTime       time.Time
 	authObject       *model.AuthResp
+	xGolomtKey       string
 	clientID         string
 	state            string
 	scope            string
@@ -64,17 +65,25 @@ type Openbank interface {
 	AccountOtherBankCustomerDetail(body model.AccountCustomerDetailReq) (*model.AccountOtherBankCustomerDetailResp, error)
 
 	// 6.1.	Голомт Банк хоорондын гүйлгээ
-	TransactionInternal(body model.TransactionReq) (*model.TransactionResp, error)
+	TransactionInBank(body model.TransactionReq) (*model.TransactionResp, error)
 	// 6.2.	 Бусад банк хоорондын гүйлгээ
 	TransactionOtherBank(body model.TransactionReq) (*model.TransactionResp, error)
-	// 6.3.	Гүйлгээний төлөв шалгах
-	TransactionCheck(body model.TransactionCheckReq) (*model.TransactionCheckResp, error)
+	// 6.3. Байгууллага өөрийн дансаас гүйлгээ хийх
+	TransactionSelf(body model.TransactionSelfReq) (*model.TransactionSelfResp, error)
+	// 6.8. Гүйлгээний төлөв шалгах
+	TransactionConfirm(body model.TransactionConfirmReq) (*model.TransactionConfirmResp, error)
+	// 7.1.	Хот, аймагийн жагсаалт авах
+	StateListInq(body model.StateListReq) ([]model.StateListResp, error)
+	// 7.2.	Сум, дүүргийн жагсаалт авах
+	DistrictListInq(body model.DistrictListReq) ([]model.DistrictListResp, error)
+	// 7.3.	Категори төрлөөр сонголтын жагсаалт авах
+	CategoryListInq(body model.CategoryReq) (*model.CategoryResp, error)
 	// 7.4.	Ханшны мэдээлэл авах
 	RateInq(body model.RateReq) (*model.RateResp, error)
 	// 7.5.	Салбарын жагсаалт авах
-	BranchListInq(body model.BranchListReq) (*model.BranchListResp, error)
+	BranchListInq(body model.BranchListReq) ([]model.BranchListResp, error)
 	// 7.6.	Бүтээгдэхүүн лавлах
-	ProductListInq(body model.ProductListReq) (*[]model.ProductData, error)
+	ProductListInq(body model.ProductListReq) ([]model.ProductData, error)
 }
 
 func New(input model.OpenbankInput) Openbank {
@@ -91,5 +100,12 @@ func New(input model.OpenbankInput) Openbank {
 		clientID:         input.ClientID,
 		state:            "",
 		scope:            "",
+		xGolomtKey:       input.XGolomtKey,
 	}
+}
+
+func (o *openbank) SetOAuthResponse(response model.OAuthResp) {
+	o.clientID = response.ClientID
+	o.state = response.State
+	o.scope = response.Scope
 }

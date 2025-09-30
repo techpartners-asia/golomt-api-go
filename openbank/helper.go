@@ -92,13 +92,19 @@ func (o openbank) bodyChecksum(body interface{}) (string, error) {
 	return checkSum, nil
 }
 
-func parseResponse[T any](response []byte, decryptFunc func(string) (string, error)) (T, error) {
+func parseEncryptedResponse[T any](response []byte, decryptFunc func(string) (string, error)) (T, error) {
 	var result T
 	responseData, err := decryptFunc(string(response))
 	if err != nil {
 		return result, err
 	}
 	err = json.Unmarshal([]byte(responseData), &result)
+	return result, err
+}
+
+func parseResponse[T any](response []byte) (T, error) {
+	var result T
+	err := json.Unmarshal(response, &result)
 	return result, err
 }
 
@@ -112,4 +118,14 @@ func ParseOathResponse(response []byte) (*model.OAuthResp, error) {
 		return nil, err
 	}
 	return result, nil
+}
+
+func bodyReader(body interface{}) *bytes.Reader {
+	requestByte, _ := json.Marshal(body)
+	if len(requestByte) == 0 {
+		fmt.Println("body is empty")
+		return nil
+	}
+	requestBody := bytes.NewReader(requestByte)
+	return requestBody
 }

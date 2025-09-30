@@ -34,5 +34,15 @@ type (
 		Url              string `json:"url"`              // URL
 		RegisterNo       string `json:"registerNo"`       // Бүртгүүлсэн байгууллагын дугаар
 		ClientID         string `json:"clientId"`         // Хэрэглэгчийн ID
+		XGolomtKey       string `json:"xGolomtKey"`       // X-Golomt-Key
+	}
+
+	PageReq struct {
+		PageNo   string `json:"pageNo"`
+		PageSize string `json:"pageSize"`
+		// Desc, Asc
+		Sort string `json:"sort"`
+		// ID, etc
+		SortBy string `json:"sortBy"`
 	}
 )
