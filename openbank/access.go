@@ -21,6 +21,7 @@ func (o *openbank) auth() error {
 		res, err := client.R().
 			SetHeader("Content-Type", "application/json").
 			SetHeader("X-Golomt-Service", "LGIN").
+			SetHeader("Authorization", "Bearer "+o.authObject.RefreshToken).
 			SetResult(&response).
 			SetError(&errResp).
 			Get(o.url + "/v1/auth/refresh")
