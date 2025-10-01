@@ -11,7 +11,7 @@ import (
 func (o *openbank) auth() error {
 	if o.authObject != nil {
 		// 4.2.	Холболт шинэчлэх
-		if o.expireTime.Before(time.Now()) {
+		if o.expireTime.After(time.Now()) {
 			return nil
 		}
 		client := resty.New()
@@ -73,7 +73,7 @@ func (o *openbank) auth() error {
 }
 
 // 4.4.	Сервисүүдийг багцаар авах
-func (o openbank) ServicesAccess(body model.ServiceListReq) (*model.ServiceListResp, error) {
+func (o *openbank) ServicesAccess(body model.ServiceListReq) (*model.ServiceListResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func (o openbank) ServicesAccess(body model.ServiceListReq) (*model.ServiceListR
 }
 
 // 4.5.	Бүртгэлтэй дугаар татах
-func (o openbank) GetPhone() (*model.GetPhoneResp, error) {
+func (o *openbank) GetPhone() (*model.GetPhoneResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -148,7 +148,7 @@ func (o openbank) GetPhone() (*model.GetPhoneResp, error) {
 }
 
 // 4.6.	Бүртгэлтэй дугаар руу OTP код илгээх
-func (o openbank) OTPSend(phone string) (*model.OTPSendResp, error) {
+func (o *openbank) OTPSend(phone string) (*model.OTPSendResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -191,7 +191,7 @@ func (o openbank) OTPSend(phone string) (*model.OTPSendResp, error) {
 }
 
 // 4.7.	OTP шалгах
-func (o openbank) OTPVerify(body model.OTPVerifyReq) (*model.OTPVerifyResp, error) {
+func (o *openbank) OTPVerify(body model.OTPVerifyReq) (*model.OTPVerifyResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -227,7 +227,7 @@ func (o openbank) OTPVerify(body model.OTPVerifyReq) (*model.OTPVerifyResp, erro
 }
 
 // 4.8.	ХУР систем OTP илгээх
-func (o openbank) XypOTPSend() (*model.OTPSendResp, error) {
+func (o *openbank) XypOTPSend() (*model.OTPSendResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -267,7 +267,7 @@ func (o openbank) XypOTPSend() (*model.OTPSendResp, error) {
 }
 
 // 4.9.	ХУР систем OTP шалгах
-func (o openbank) XypOTPVerify(body model.OTPXypVerifyReq) (*model.OTPVerifyResp, error) {
+func (o *openbank) XypOTPVerify(body model.OTPXypVerifyReq) (*model.OTPVerifyResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -303,7 +303,7 @@ func (o openbank) XypOTPVerify(body model.OTPXypVerifyReq) (*model.OTPVerifyResp
 }
 
 // 4.10. Тоон гарын үсгээр баталгаажуулах
-func (o openbank) DigitalSignature() (*model.DigitalSignatureResp, error) {
+func (o *openbank) DigitalSignature() (*model.DigitalSignatureResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}

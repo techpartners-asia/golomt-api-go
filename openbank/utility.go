@@ -9,7 +9,7 @@ import (
 )
 
 // 7.1.	Хот, аймагийн жагсаалт авах
-func (o openbank) StateListInq(body model.StateListReq) ([]model.StateListResp, error) {
+func (o *openbank) StateListInq(body model.StateListReq) ([]model.StateListResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (o openbank) StateListInq(body model.StateListReq) ([]model.StateListResp, 
 }
 
 // 7.2.	Сум, дүүргийн жагсаалт авах
-func (o openbank) DistrictListInq(body model.DistrictListReq) ([]model.DistrictListResp, error) {
+func (o *openbank) DistrictListInq(body model.DistrictListReq) ([]model.DistrictListResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (o openbank) DistrictListInq(body model.DistrictListReq) ([]model.DistrictL
 }
 
 // 7.3.	Категори төрлөөр сонголтын жагсаалт авах
-func (o openbank) CategoryListInq(body model.CategoryReq) (*model.CategoryResp, error) {
+func (o *openbank) CategoryListInq(body model.CategoryReq) (*model.CategoryResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func (o openbank) CategoryListInq(body model.CategoryReq) (*model.CategoryResp, 
 }
 
 // 7.4.	Ханшны мэдээлэл авах
-func (o openbank) RateInq(body model.RateReq) (*model.RateResp, error) {
+func (o *openbank) RateInq(body model.RateReq) (*model.RateResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -163,7 +163,7 @@ func (o openbank) RateInq(body model.RateReq) (*model.RateResp, error) {
 }
 
 // 7.5.	Салбарын жагсаалт авах
-func (o openbank) BranchListInq(body model.BranchListReq) ([]model.BranchListResp, error) {
+func (o *openbank) BranchListInq(body model.BranchListReq) ([]model.BranchListResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -201,7 +201,7 @@ func (o openbank) BranchListInq(body model.BranchListReq) ([]model.BranchListRes
 }
 
 // 7.6.	Бүтээгдэхүүн лавлах
-func (o openbank) ProductListInq(body model.ProductListReq) ([]model.ProductData, error) {
+func (o *openbank) ProductListInq(body model.ProductListReq) ([]model.ProductData, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}

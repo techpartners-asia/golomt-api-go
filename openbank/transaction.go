@@ -11,7 +11,7 @@ import (
 )
 
 // 6.1.	Голомт Банк хоорондын гүйлгээ
-func (o openbank) TransactionInBank(body model.TransactionReq) (*model.TransactionResp, error) {
+func (o *openbank) TransactionInBank(body model.TransactionReq) (*model.TransactionResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (o openbank) TransactionInBank(body model.TransactionReq) (*model.Transacti
 }
 
 // 6.2.	 Бусад банк хоорондын гүйлгээ
-func (o openbank) TransactionOtherBank(body model.TransactionReq) (*model.TransactionResp, error) {
+func (o *openbank) TransactionOtherBank(body model.TransactionReq) (*model.TransactionResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func (o openbank) TransactionOtherBank(body model.TransactionReq) (*model.Transa
 }
 
 // 6.3. Байгууллага өөрийн дансаас гүйлгээ хийх
-func (o openbank) TransactionSelf(body model.TransactionSelfReq) (*model.TransactionSelfResp, error) {
+func (o *openbank) TransactionSelf(body model.TransactionSelfReq) (*model.TransactionSelfResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func (o openbank) TransactionSelf(body model.TransactionSelfReq) (*model.Transac
 }
 
 // 6.4. Гүйлгээ буцаах
-func (o openbank) TransactionRefund(body model.TransactionRefundReq) (*model.TransactionRefundResp, error) {
+func (o *openbank) TransactionRefund(body model.TransactionRefundReq) (*model.TransactionRefundResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -187,7 +187,7 @@ func (o openbank) TransactionRefund(body model.TransactionRefundReq) (*model.Tra
 }
 
 // 6.5. Гүйлгээ шалгах
-func (o openbank) TransactionCheck(body model.TransactionCheckReq) (*model.TransactionCheckResp, error) {
+func (o *openbank) TransactionCheck(body model.TransactionCheckReq) (*model.TransactionCheckResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -230,7 +230,7 @@ func (o openbank) TransactionCheck(body model.TransactionCheckReq) (*model.Trans
 }
 
 // 6.6. Багц гүйлгээ хийх
-func (o openbank) TransactionBatch(body model.TransactionBatchReq) (*model.TransactionBatchResp, error) {
+func (o *openbank) TransactionBatch(body model.TransactionBatchReq) (*model.TransactionBatchResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -281,7 +281,7 @@ func (o openbank) TransactionBatch(body model.TransactionBatchReq) (*model.Trans
 }
 
 // 6.7. Багц гүйлгээний төлөв шалгах
-func (o openbank) TransactionBatchCheck(body model.TransactionBatchCheckReq, page model.PageReq) (*model.TransactionBatchCheckResp, error) {
+func (o *openbank) TransactionBatchCheck(body model.TransactionBatchCheckReq, page model.PageReq) (*model.TransactionBatchCheckResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -331,7 +331,7 @@ func (o openbank) TransactionBatchCheck(body model.TransactionBatchCheckReq, pag
 }
 
 // 6.8. Гүйлгээний төлөв шалгах
-func (o openbank) TransactionConfirm(body model.TransactionConfirmReq) (*model.TransactionConfirmResp, error) {
+func (o *openbank) TransactionConfirm(body model.TransactionConfirmReq) (*model.TransactionConfirmResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -369,7 +369,7 @@ func (o openbank) TransactionConfirm(body model.TransactionConfirmReq) (*model.T
 }
 
 // 6.9. Багц гүйлгээ файлаар хийх
-func (o openbank) TransactionBatchFile(input model.TransactionBatchFileInput) (*model.TransactionBatchFileResp, error) {
+func (o *openbank) TransactionBatchFile(input model.TransactionBatchFileInput) (*model.TransactionBatchFileResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}

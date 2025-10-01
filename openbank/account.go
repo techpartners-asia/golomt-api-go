@@ -9,7 +9,7 @@ import (
 )
 
 // 5.1.	Дансны үлдэгдэл
-func (o openbank) AccountBalcInq(body model.AccountBalcInqReq) (*model.AccountBalcInqResp, error) {
+func (o *openbank) AccountBalcInq(body model.AccountBalcInqReq) (*model.AccountBalcInqResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (o openbank) AccountBalcInq(body model.AccountBalcInqReq) (*model.AccountBa
 }
 
 // 5.2.	Дансны төрөл шалгах
-func (o openbank) AccountTypeInq(body model.AccountTypeInqReq) (*model.AccountTypeInqResp, error) {
+func (o *openbank) AccountTypeInq(body model.AccountTypeInqReq) (*model.AccountTypeInqResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (o openbank) AccountTypeInq(body model.AccountTypeInqReq) (*model.AccountTy
 }
 
 // 5.3.	Дансны товч нэр солих
-func (o openbank) AccountRename(body model.AccountRenameReq) (*model.AccountRenameResp, error) {
+func (o *openbank) AccountRename(body model.AccountRenameReq) (*model.AccountRenameResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func (o openbank) AccountRename(body model.AccountRenameReq) (*model.AccountRena
 }
 
 // 5.4.	Харилцах дансны дэлгэрэнгүй мэдээлэл харах
-func (o openbank) AccountDetail(body model.AccountDetailReq) (*model.AccountDetailResp, error) {
+func (o *openbank) AccountDetail(body model.AccountDetailReq) (*model.AccountDetailResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -163,7 +163,7 @@ func (o openbank) AccountDetail(body model.AccountDetailReq) (*model.AccountDeta
 }
 
 // 5.5.	Харилцах дансны хуулга харах
-func (o openbank) AccountStatement(body model.StatementReq) (*model.StatementResp, error) {
+func (o *openbank) AccountStatement(body model.StatementReq) (*model.StatementResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -207,7 +207,7 @@ func (o openbank) AccountStatement(body model.StatementReq) (*model.StatementRes
 }
 
 // 5.6.	Харилцах данс нээх
-func (o openbank) AccountAdd(body model.AccountAddReq) (*model.AccountAddResp, error) {
+func (o *openbank) AccountAdd(body model.AccountAddReq) (*model.AccountAddResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -248,7 +248,7 @@ func (o openbank) AccountAdd(body model.AccountAddReq) (*model.AccountAddResp, e
 }
 
 // 5.7.	 Хадгаламжийн дансны дэлгэрэнгүй
-func (o openbank) AccountDepositDetail(body model.AccountDetailReq) (*model.AccountDepositDetailResp, error) {
+func (o *openbank) AccountDepositDetail(body model.AccountDetailReq) (*model.AccountDepositDetailResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -290,7 +290,7 @@ func (o openbank) AccountDepositDetail(body model.AccountDetailReq) (*model.Acco
 
 // 5.8.	Хадгаламжийн дансны хуулга харах
 // TODO: maybe response is not correct
-func (o openbank) AccountDepositStatement(body model.StatementReq) (*model.AccountAddResp, error) {
+func (o *openbank) AccountDepositStatement(body model.StatementReq) (*model.AccountAddResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -331,7 +331,7 @@ func (o openbank) AccountDepositStatement(body model.StatementReq) (*model.Accou
 }
 
 // 5.9.	Хадгаламжийн данс нээх
-func (o openbank) AccountDepositAdd(body model.AccountDepositAddReq) (*model.AccountAddResp, error) {
+func (o *openbank) AccountDepositAdd(body model.AccountDepositAddReq) (*model.AccountAddResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -367,7 +367,7 @@ func (o openbank) AccountDepositAdd(body model.AccountDepositAddReq) (*model.Acc
 }
 
 // 5.10. Дансны жагсаалт татах
-func (o openbank) AccountList(body model.AccountListReq) (*model.AccountListResp, error) {
+func (o *openbank) AccountList(body model.AccountListReq) (*model.AccountListResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -411,7 +411,7 @@ func (o openbank) AccountList(body model.AccountListReq) (*model.AccountListResp
 }
 
 // 5.11.a Данс эзэмшигчнийн мэдээллэл авах /Голомт/
-func (o openbank) AccountCustomerDetail(body model.AccountCustomerDetailReq) (*model.AccountCustomerDetailResp, error) {
+func (o *openbank) AccountCustomerDetail(body model.AccountCustomerDetailReq) (*model.AccountCustomerDetailResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
@@ -452,7 +452,7 @@ func (o openbank) AccountCustomerDetail(body model.AccountCustomerDetailReq) (*m
 }
 
 // 5.11.b Данс эзэмшигчнийн мэдээллэл авах /Голомт бус/
-func (o openbank) AccountOtherBankCustomerDetail(body model.AccountCustomerDetailReq) (*model.AccountOtherBankCustomerDetailResp, error) {
+func (o *openbank) AccountOtherBankCustomerDetail(body model.AccountCustomerDetailReq) (*model.AccountOtherBankCustomerDetailResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
