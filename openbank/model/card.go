@@ -5,7 +5,7 @@ type (
 		// Карт эзэмшигч иргэний РД
 		CivilRegisterNo string `json:"civilRegisterNo" validate:"required"`
 		// Байгууллагын РД
-		CorporateRegisterNo string `json:"corporateRegisterNo" validate:"required"`
+		CorporateRegisterNo string `json:"corpRegisterNo" validate:"required"`
 	}
 	TokenizeResp struct {
 		// Статус
