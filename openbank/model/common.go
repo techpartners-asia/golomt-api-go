@@ -38,11 +38,11 @@ type (
 	}
 
 	PageReq struct {
-		PageNo   string `json:"pageNo"`
-		PageSize string `json:"pageSize"`
+		PageNo   string
+		PageSize string
 		// Desc, Asc
-		Sort string `json:"sort"`
+		Sort string
 		// ID, etc
-		SortBy string `json:"sortBy"`
+		SortBy string
 	}
 )
