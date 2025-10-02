@@ -84,6 +84,23 @@ type Openbank interface {
 	BranchListInq(body model.BranchListReq) ([]model.BranchListResp, error)
 	// 7.6.	Бүтээгдэхүүн лавлах
 	ProductListInq(body model.ProductListReq) ([]model.ProductData, error)
+
+	// 8.1.	Картын токен авах
+	CardTokenize(body model.TokenizeReq) (*model.TokenizeResp, error)
+	// 8.2.	Картын токеныг хаах
+	CardTokenClose(body model.TokenCloseReq) (*model.TokenCloseResp, error)
+	// 8.3.	Картын гүйлгээ хийх
+	CardPurchase(body model.CardPurchaseReq) (*model.CardPurchaseResp, error)
+	// 8.4.	Картын гүйлгээний дүн шалгах
+	CardPurchaseCheck(body model.CardPurchaseCheckReq) (*model.CardPurchaseCheckResp, error)
+	// 8.5.	Картын хуулга харах
+	CardMerchantStatement(body model.CardMerchantStatementReq, page model.PageReq) (*model.CardMerchantStatementResp, error)
+	// 8.6.	Кредит картын дэлгэрэнгүй
+	CardCreditDetail(body model.CardCreditDetailReq) (*model.CardCreditDetailResp, error)
+	// 8.7.	Картын гүйлгээний мэдээлэл татах
+	CardTransaction(body model.CardTransactionReq) (*model.CardTransactionResp, error)
+	// 8.8.	Кредит карт хуулга харах
+	CardCreditStatement(body model.CardCreditStatementReq) ([]model.CardCreditStatementData, error)
 }
 
 func New(input model.OpenbankInput) Openbank {
