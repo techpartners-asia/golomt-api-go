@@ -16,6 +16,7 @@ func (o *openbank) AccountBalcInq(body model.AccountBalcInqReq) (*model.AccountB
 
 	client := resty.New()
 	defer client.Close()
+	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "ACCTBALINQ").
@@ -37,8 +38,7 @@ func (o *openbank) AccountBalcInq(body model.AccountBalcInqReq) (*model.AccountB
 	if err != nil {
 		return nil, err
 	}
-
-	response := []byte(res.String())
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -57,6 +57,7 @@ func (o *openbank) AccountTypeInq(body model.AccountTypeInqReq) (*model.AccountT
 
 	client := resty.New()
 	defer client.Close()
+	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "ACCTTYPEINQ").
@@ -73,7 +74,7 @@ func (o *openbank) AccountTypeInq(body model.AccountTypeInqReq) (*model.AccountT
 	if err != nil {
 		return nil, err
 	}
-	response := []byte(res.String())
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -92,6 +93,7 @@ func (o *openbank) AccountRename(body model.AccountRenameReq) (*model.AccountRen
 
 	client := resty.New()
 	defer client.Close()
+	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "ACCTRNM").
@@ -108,7 +110,7 @@ func (o *openbank) AccountRename(body model.AccountRenameReq) (*model.AccountRen
 	if err != nil {
 		return nil, err
 	}
-	response := []byte(res.String())
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -127,6 +129,7 @@ func (o *openbank) AccountDetail(body model.AccountDetailReq) (*model.AccountDet
 
 	client := resty.New()
 	defer client.Close()
+	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "OPERACCTDET").
@@ -148,7 +151,7 @@ func (o *openbank) AccountDetail(body model.AccountDetailReq) (*model.AccountDet
 	if err != nil {
 		return nil, err
 	}
-	response := []byte(res.String())
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -211,6 +214,7 @@ func (o *openbank) AccountAdd(body model.AccountAddReq) (*model.AccountAddResp, 
 
 	client := resty.New()
 	defer client.Close()
+	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "OPEACCADD").
@@ -232,7 +236,7 @@ func (o *openbank) AccountAdd(body model.AccountAddReq) (*model.AccountAddResp, 
 	if err != nil {
 		return nil, err
 	}
-	response := []byte(res.String())
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -251,6 +255,7 @@ func (o *openbank) AccountDepositDetail(body model.AccountDetailReq) (*model.Acc
 
 	client := resty.New()
 	defer client.Close()
+	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "DEPACCDTLS").
@@ -272,7 +277,7 @@ func (o *openbank) AccountDepositDetail(body model.AccountDetailReq) (*model.Acc
 	if err != nil {
 		return nil, err
 	}
-	response := []byte(res.String())
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -292,6 +297,7 @@ func (o *openbank) AccountDepositStatement(body model.StatementReq) (*model.Acco
 
 	client := resty.New()
 	defer client.Close()
+	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "DEPACCSTTM").
@@ -313,7 +319,7 @@ func (o *openbank) AccountDepositStatement(body model.StatementReq) (*model.Acco
 	if err != nil {
 		return nil, err
 	}
-	response := []byte(res.String())
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -332,6 +338,7 @@ func (o *openbank) AccountDepositAdd(body model.AccountDepositAddReq) (*model.Ac
 
 	client := resty.New()
 	defer client.Close()
+	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "DEPACCADD").
@@ -348,7 +355,7 @@ func (o *openbank) AccountDepositAdd(body model.AccountDepositAddReq) (*model.Ac
 	if err != nil {
 		return nil, err
 	}
-	response := []byte(res.String())
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -367,6 +374,7 @@ func (o *openbank) AccountList(body model.AccountListReq) (*model.AccountListRes
 
 	client := resty.New()
 	defer client.Close()
+	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "ACCTLST").
@@ -388,7 +396,7 @@ func (o *openbank) AccountList(body model.AccountListReq) (*model.AccountListRes
 	if err != nil {
 		return nil, err
 	}
-	response := res.Bytes()
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		if len(response) == 0 {
 			return nil, fmt.Errorf("%s-Golomt CG account list response: %s", time.Now().Format("20060102150405"), res.Status())
@@ -410,6 +418,7 @@ func (o *openbank) AccountCustomerDetail(body model.AccountCustomerDetailReq) (*
 
 	client := resty.New()
 	defer client.Close()
+	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "ACCCHK").
@@ -431,7 +440,7 @@ func (o *openbank) AccountCustomerDetail(body model.AccountCustomerDetailReq) (*
 	if err != nil {
 		return nil, err
 	}
-	response := []byte(res.String())
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -450,6 +459,7 @@ func (o *openbank) AccountOtherBankCustomerDetail(body model.AccountCustomerDeta
 
 	client := resty.New()
 	defer client.Close()
+	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "ACCCHK").
@@ -471,7 +481,7 @@ func (o *openbank) AccountOtherBankCustomerDetail(body model.AccountCustomerDeta
 	if err != nil {
 		return nil, err
 	}
-	response := []byte(res.String())
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
