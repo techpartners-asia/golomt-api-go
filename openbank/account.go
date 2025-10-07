@@ -16,7 +16,6 @@ func (o *openbank) AccountBalcInq(body model.AccountBalcInqReq) (*model.AccountB
 
 	client := resty.New()
 	defer client.Close()
-	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "ACCTBALINQ").
@@ -34,11 +33,12 @@ func (o *openbank) AccountBalcInq(body model.AccountBalcInqReq) (*model.AccountB
 			"state":    o.state,
 			"scope":    o.scope,
 		}).
-		SetResult(&response).
 		Post(o.url + "/v1/account/balance/inq")
 	if err != nil {
 		return nil, err
 	}
+
+	response := []byte(res.String())
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -57,7 +57,6 @@ func (o *openbank) AccountTypeInq(body model.AccountTypeInqReq) (*model.AccountT
 
 	client := resty.New()
 	defer client.Close()
-	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "ACCTTYPEINQ").
@@ -70,11 +69,11 @@ func (o *openbank) AccountTypeInq(body model.AccountTypeInqReq) (*model.AccountT
 		}()).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
-		SetResult(&response).
 		Post(o.url + "/v1/account/type/inq")
 	if err != nil {
 		return nil, err
 	}
+	response := []byte(res.String())
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -93,7 +92,6 @@ func (o *openbank) AccountRename(body model.AccountRenameReq) (*model.AccountRen
 
 	client := resty.New()
 	defer client.Close()
-	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "ACCTRNM").
@@ -106,11 +104,11 @@ func (o *openbank) AccountRename(body model.AccountRenameReq) (*model.AccountRen
 		}()).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
-		SetResult(&response).
 		Post(o.url + "/v1/account/rename")
 	if err != nil {
 		return nil, err
 	}
+	response := []byte(res.String())
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -129,7 +127,6 @@ func (o *openbank) AccountDetail(body model.AccountDetailReq) (*model.AccountDet
 
 	client := resty.New()
 	defer client.Close()
-	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "OPERACCTDET").
@@ -147,11 +144,11 @@ func (o *openbank) AccountDetail(body model.AccountDetailReq) (*model.AccountDet
 			"scope":    o.scope,
 		}).
 		SetBody(bodyReader(body)).
-		SetResult(&response).
 		Post(o.url + "/v1/account/operative/details")
 	if err != nil {
 		return nil, err
 	}
+	response := []byte(res.String())
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -214,7 +211,6 @@ func (o *openbank) AccountAdd(body model.AccountAddReq) (*model.AccountAddResp, 
 
 	client := resty.New()
 	defer client.Close()
-	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "OPEACCADD").
@@ -232,11 +228,11 @@ func (o *openbank) AccountAdd(body model.AccountAddReq) (*model.AccountAddResp, 
 			"scope":    o.scope,
 		}).
 		SetBody(bodyReader(body)).
-		SetResult(&response).
 		Post(o.url + "/v1/account/operative/add")
 	if err != nil {
 		return nil, err
 	}
+	response := []byte(res.String())
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -255,7 +251,6 @@ func (o *openbank) AccountDepositDetail(body model.AccountDetailReq) (*model.Acc
 
 	client := resty.New()
 	defer client.Close()
-	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "DEPACCDTLS").
@@ -273,11 +268,11 @@ func (o *openbank) AccountDepositDetail(body model.AccountDetailReq) (*model.Acc
 			"state":    o.state,
 			"scope":    o.scope,
 		}).
-		SetResult(&response).
 		Post(o.url + "/v1/account/deposit/details")
 	if err != nil {
 		return nil, err
 	}
+	response := []byte(res.String())
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -297,7 +292,6 @@ func (o *openbank) AccountDepositStatement(body model.StatementReq) (*model.Acco
 
 	client := resty.New()
 	defer client.Close()
-	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "DEPACCSTTM").
@@ -315,11 +309,11 @@ func (o *openbank) AccountDepositStatement(body model.StatementReq) (*model.Acco
 			"state":    o.state,
 			"scope":    o.scope,
 		}).
-		SetResult(&response).
 		Post(o.url + "/v1/account/deposit/statement")
 	if err != nil {
 		return nil, err
 	}
+	response := []byte(res.String())
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -338,7 +332,6 @@ func (o *openbank) AccountDepositAdd(body model.AccountDepositAddReq) (*model.Ac
 
 	client := resty.New()
 	defer client.Close()
-	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "DEPACCADD").
@@ -351,11 +344,11 @@ func (o *openbank) AccountDepositAdd(body model.AccountDepositAddReq) (*model.Ac
 		}()).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
-		SetResult(&response).
 		Post(o.url + "/v1/account/deposit/add")
 	if err != nil {
 		return nil, err
 	}
+	response := []byte(res.String())
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -374,7 +367,6 @@ func (o *openbank) AccountList(body model.AccountListReq) (*model.AccountListRes
 
 	client := resty.New()
 	defer client.Close()
-	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "ACCTLST").
@@ -396,7 +388,7 @@ func (o *openbank) AccountList(body model.AccountListReq) (*model.AccountListRes
 	if err != nil {
 		return nil, err
 	}
-	response = res.Bytes()
+	response := res.Bytes()
 	if res.StatusCode() != 200 {
 		if len(response) == 0 {
 			return nil, fmt.Errorf("%s-Golomt CG account list response: %s", time.Now().Format("20060102150405"), res.Status())
@@ -418,7 +410,6 @@ func (o *openbank) AccountCustomerDetail(body model.AccountCustomerDetailReq) (*
 
 	client := resty.New()
 	defer client.Close()
-	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "ACCCHK").
@@ -436,11 +427,11 @@ func (o *openbank) AccountCustomerDetail(body model.AccountCustomerDetailReq) (*
 			"scope":    o.scope,
 		}).
 		SetBody(bodyReader(body)).
-		SetResult(&response).
 		Post(o.url + "/v1/account/customer/detail")
 	if err != nil {
 		return nil, err
 	}
+	response := []byte(res.String())
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -459,7 +450,6 @@ func (o *openbank) AccountOtherBankCustomerDetail(body model.AccountCustomerDeta
 
 	client := resty.New()
 	defer client.Close()
-	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "ACCCHK").
@@ -477,11 +467,11 @@ func (o *openbank) AccountOtherBankCustomerDetail(body model.AccountCustomerDeta
 		}).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
-		SetResult(&response).
 		Post(o.url + "/v1/account/customer/detail")
 	if err != nil {
 		return nil, err
 	}
+	response := []byte(res.String())
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
