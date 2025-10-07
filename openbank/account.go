@@ -34,11 +34,11 @@ func (o *openbank) AccountBalcInq(body model.AccountBalcInqReq) (*model.AccountB
 			"state":    o.state,
 			"scope":    o.scope,
 		}).
-		SetResult(&response).
 		Post(o.url + "/v1/account/balance/inq")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -70,11 +70,11 @@ func (o *openbank) AccountTypeInq(body model.AccountTypeInqReq) (*model.AccountT
 		}()).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
-		SetResult(&response).
 		Post(o.url + "/v1/account/type/inq")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -106,11 +106,11 @@ func (o *openbank) AccountRename(body model.AccountRenameReq) (*model.AccountRen
 		}()).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
-		SetResult(&response).
 		Post(o.url + "/v1/account/rename")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -147,11 +147,11 @@ func (o *openbank) AccountDetail(body model.AccountDetailReq) (*model.AccountDet
 			"scope":    o.scope,
 		}).
 		SetBody(bodyReader(body)).
-		SetResult(&response).
 		Post(o.url + "/v1/account/operative/details")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -232,11 +232,11 @@ func (o *openbank) AccountAdd(body model.AccountAddReq) (*model.AccountAddResp, 
 			"scope":    o.scope,
 		}).
 		SetBody(bodyReader(body)).
-		SetResult(&response).
 		Post(o.url + "/v1/account/operative/add")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -273,11 +273,11 @@ func (o *openbank) AccountDepositDetail(body model.AccountDetailReq) (*model.Acc
 			"state":    o.state,
 			"scope":    o.scope,
 		}).
-		SetResult(&response).
 		Post(o.url + "/v1/account/deposit/details")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -315,11 +315,11 @@ func (o *openbank) AccountDepositStatement(body model.StatementReq) (*model.Acco
 			"state":    o.state,
 			"scope":    o.scope,
 		}).
-		SetResult(&response).
 		Post(o.url + "/v1/account/deposit/statement")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -351,11 +351,11 @@ func (o *openbank) AccountDepositAdd(body model.AccountDepositAddReq) (*model.Ac
 		}()).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
-		SetResult(&response).
 		Post(o.url + "/v1/account/deposit/add")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -436,11 +436,11 @@ func (o *openbank) AccountCustomerDetail(body model.AccountCustomerDetailReq) (*
 			"scope":    o.scope,
 		}).
 		SetBody(bodyReader(body)).
-		SetResult(&response).
 		Post(o.url + "/v1/account/customer/detail")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
@@ -477,11 +477,11 @@ func (o *openbank) AccountOtherBankCustomerDetail(body model.AccountCustomerDeta
 		}).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
-		SetResult(&response).
 		Post(o.url + "/v1/account/customer/detail")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
