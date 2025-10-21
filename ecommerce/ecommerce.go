@@ -28,6 +28,9 @@ type GolomtEcommerce interface {
 	CreateToken(input CreateTokenInput) (*CreateTokenResponse, error)                            // Токен үүсгэх
 	CheckToken(transactionId string) (*CheckTokenResponse, error)                                // Токен шалгах
 	GetSettlementDetails(input GetSettlementDetailsInput) (*GetSettlementDetailsResponse, error) // Гүйлгээний өндөрлөгөө хийсэн дэлгэрэнгүй мэдээлэл авах
+
+	// * Testing
+	Refund(txnID string) (*RefundResponse, error)
 }
 
 func New(baseUrl, secret, bearerToken string) GolomtEcommerce {
@@ -382,5 +385,31 @@ func (g *golomtEcommerce) GetSettlementDetails(input GetSettlementDetailsInput) 
 	if res.IsError() {
 		return nil, errors.New(res.Error().(string))
 	}
+	return response, nil
+}
+
+func (g *golomtEcommerce) Refund(txnID string) (*RefundResponse, error) {
+	var response *RefundResponse
+
+	client := resty.New()
+
+	res, err := client.R().
+		SetHeader("Content-Type", "application/json").
+		SetHeader("Authorization", "Bearer "+g.bearerToken).
+		SetBody(map[string]string{
+			"txnId": txnID,
+		}).
+		SetResult(&response).
+		Post(g.baseUrl + "/payment/void")
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("Response: ", res.String())
+
+	if response == nil {
+		return nil, errors.New("response is nil")
+	}
+
 	return response, nil
 }

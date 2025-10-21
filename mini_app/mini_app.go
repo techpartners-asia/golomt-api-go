@@ -82,19 +82,16 @@ func (s *socialPayMiniApp) GetUserInfo(token string) (*UserInfo, error) {
 
 func (s *socialPayMiniApp) SendNotification(input SendNotificationInput) error {
 
-	payload, err := json.Marshal(input)
+	str := fmt.Sprintf(`{"individualId":"%s","messageTitle": "%s","messageText":"%s","data":{"VIEW_ID":"%s","MINIAPP_URL":"%s"}}`, input.IndividualId, input.MessageTitle, input.MessageText, input.VIEW_ID, input.MINIAPP_URL)
+
+	jsonPayload := strings.NewReader(str)
+
+	encryptedToken, err := utils.EncryptRSA(str, s.base64PublicKey)
 	if err != nil {
 		return err
 	}
 
-	stringPayload := string(payload)
-
-	jsonPayload := strings.NewReader(stringPayload)
-
-	encryptedToken, err := utils.EncryptRSA(stringPayload, s.base64PublicKey)
-	if err != nil {
-		return err
-	}
+	fmt.Println(encryptedToken)
 
 	client := &http.Client{}
 	req, err := http.NewRequest(http.MethodPost, s.baseUrl+"/utility/notification/push?language=mn", jsonPayload)
@@ -104,6 +101,7 @@ func (s *socialPayMiniApp) SendNotification(input SendNotificationInput) error {
 
 	req.Header.Add("X-Golomt-Signature", encryptedToken)
 	req.Header.Add("X-Golomt-Cert-Id", s.clientId)
+	req.Header.Add("Content-Type", "application/json")
 
 	res, err := client.Do(req)
 	if err != nil {
@@ -115,6 +113,8 @@ func (s *socialPayMiniApp) SendNotification(input SendNotificationInput) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Println(string(body))
 
 	response := &SendNotificationResponse{}
 	err = json.Unmarshal(body, response)

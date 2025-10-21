@@ -190,4 +190,11 @@ type (
 		Message   string `json:"message"`
 		Path      string `json:"path"`
 	}
+
+	RefundResponse struct {
+		StatusCode int    `json:"statusCode"`
+		Desc       string `json:"desc"`
+		TxnID      string `json:"txnID"`
+		MerchantID string `json:"merchantID"`
+	}
 )
