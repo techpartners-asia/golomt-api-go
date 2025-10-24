@@ -413,5 +413,9 @@ func (g *golomtEcommerce) Refund(txnID string) (*RefundResponse, error) {
 		return nil, errors.New("response is nil")
 	}
 
+	if response.StatusCode != "000" {
+		return nil, errors.New(response.Desc)
+	}
+
 	return response, nil
 }

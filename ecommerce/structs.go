@@ -192,7 +192,7 @@ type (
 	}
 
 	RefundResponse struct {
-		StatusCode int    `json:"statusCode"`
+		StatusCode string `json:"statusCode"`
 		Desc       string `json:"desc"`
 		TxnID      string `json:"txnID"`
 		MerchantID string `json:"merchantID"`
