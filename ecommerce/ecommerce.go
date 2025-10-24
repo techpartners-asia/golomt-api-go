@@ -405,7 +405,9 @@ func (g *golomtEcommerce) Refund(txnID string) (*RefundResponse, error) {
 		return nil, err
 	}
 
-	fmt.Println("Response: ", res.String())
+	if res.IsError() {
+		return nil, errors.New(res.String())
+	}
 
 	if response == nil {
 		return nil, errors.New("response is nil")
