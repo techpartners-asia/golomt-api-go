@@ -86,7 +86,7 @@ type Openbank interface {
 	ProductListInq(body model.ProductListReq) ([]model.ProductData, error)
 
 	// 8.1.	Картын токен авах
-	CardTokenize(body model.TokenizeReq) (*model.TokenizeResp, error)
+	CardTokenize(body model.TokenizeReq) (string, error)
 	// 8.2.	Картын токеныг хаах
 	CardTokenClose(body model.TokenCloseReq) (*model.TokenCloseResp, error)
 	// 8.3.	Картын гүйлгээ хийх

@@ -10,14 +10,14 @@ import (
 )
 
 // 8.1.	Байгууллагын виртуал кредит карт токенжуулах
-func (o *openbank) CardTokenize(body model.TokenizeReq) (*model.TokenizeResp, error) {
+func (o *openbank) CardTokenize(body model.TokenizeReq) (string, error) {
 	if err := o.auth(); err != nil {
-		return nil, err
+		return "", err
 	}
 
 	jsonBody, err := json.Marshal(body)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	fmt.Println(string(jsonBody))
 	client := resty.New()
@@ -42,7 +42,7 @@ func (o *openbank) CardTokenize(body model.TokenizeReq) (*model.TokenizeResp, er
 		}).
 		Post(o.url + "/v1/card/corp/tokenize")
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	fmt.Println(res.Request.RawRequest.URL.String())
@@ -50,15 +50,22 @@ func (o *openbank) CardTokenize(body model.TokenizeReq) (*model.TokenizeResp, er
 	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		if len(response) == 0 {
-			return nil, fmt.Errorf("%s-Golomt CG card corporate tokenize response: %s", time.Now().Format("20060102150405"), res.Status())
+			return "", fmt.Errorf("%s-Golomt CG card corporate tokenize response: %s", time.Now().Format("20060102150405"), res.Status())
 		}
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
-		return nil, fmt.Errorf("%s-Golomt CG card corporate tokenize response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
+		return "", fmt.Errorf("%s-Golomt CG card corporate tokenize response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseEncryptedResponse[*model.TokenizeResp](response, o.DecryptAESCBC)
+	// return parseEncryptedResponse[string](response, o.DecryptAESCBC)
+
+	responseData, err := o.DecryptAESCBC(string(response))
+	if err != nil {
+		return "", err
+	}
+	fmt.Println(responseData)
+	return responseData, nil
 }
 
 // 8.2.	Токен цуцлах
