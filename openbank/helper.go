@@ -98,6 +98,7 @@ func parseEncryptedResponse[T any](response []byte, decryptFunc func(string) (st
 	if err != nil {
 		return result, err
 	}
+	fmt.Println(responseData)
 	err = json.Unmarshal([]byte(responseData), &result)
 	return result, err
 }

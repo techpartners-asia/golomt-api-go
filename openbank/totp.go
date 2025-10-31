@@ -2,9 +2,12 @@ package openbank
 
 import (
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha1"
 	"encoding/base32"
+	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -14,50 +17,66 @@ const (
 	NumDigitsOutput        = 6
 )
 
-// GenerateCurrentNumber generates the current TOTP code.
-func GenerateCurrentNumber(base32Secret string) (int, error) {
-	return GenerateNumber(base32Secret, time.Now().Unix()*1000, DefaultTimeStepSeconds)
+// GenerateBase32Secret generates a random base32 secret (default length 16)
+func GenerateBase32Secret() string {
+	return GenerateBase32SecretWithLength(16)
 }
 
-// GenerateCurrentNumberString generates the current TOTP code as zero-padded string.
+// GenerateBase32SecretWithLength generates a random base32 secret of given length
+func GenerateBase32SecretWithLength(length int) string {
+	const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
+	bytes := make([]byte, length)
+	_, _ = rand.Read(bytes)
+	for i := range bytes {
+		bytes[i] = alphabet[int(bytes[i])%len(alphabet)]
+	}
+	return string(bytes)
+}
+
+// GenerateCurrentNumber generates current TOTP integer
+func GenerateCurrentNumber(base32Secret string) (int, error) {
+	return GenerateNumber(base32Secret, time.Now().UnixMilli(), DefaultTimeStepSeconds)
+}
+
+// GenerateCurrentNumberString generates current TOTP string (zero-padded)
 func GenerateCurrentNumberString(base32Secret string) (string, error) {
-	n, err := GenerateCurrentNumber(base32Secret)
+	num, err := GenerateCurrentNumber(base32Secret)
 	if err != nil {
 		return "", err
 	}
-	return ZeroPrepend(n, NumDigitsOutput), nil
+	return zeroPrepend(num, NumDigitsOutput), nil
 }
 
-// ValidateCurrentNumber checks if a given code is valid within +/- windowMillis.
+// ValidateCurrentNumber checks if a given TOTP is valid within the time window (milliseconds)
 func ValidateCurrentNumber(base32Secret string, authNumber int, windowMillis int) (bool, error) {
-	return ValidateAtTime(base32Secret, authNumber, windowMillis, time.Now().Unix()*1000, DefaultTimeStepSeconds)
+	return ValidateNumberAtTime(base32Secret, authNumber, windowMillis, time.Now().UnixMilli(), DefaultTimeStepSeconds)
 }
 
-// ValidateAtTime validates a TOTP code for a given timestamp and step.
-func ValidateAtTime(base32Secret string, authNumber int, windowMillis int, timeMillis int64, timeStepSeconds int) (bool, error) {
-	fromTimeMillis := timeMillis
-	toTimeMillis := timeMillis
+// ValidateNumberAtTime validates the TOTP number around a specific timestamp
+func ValidateNumberAtTime(base32Secret string, authNumber int, windowMillis int, timeMillis int64, timeStepSeconds int) (bool, error) {
+	from := timeMillis
+	to := timeMillis
 	if windowMillis > 0 {
-		fromTimeMillis = timeMillis - int64(windowMillis)
-		toTimeMillis = timeMillis + int64(windowMillis)
+		from = timeMillis - int64(windowMillis)
+		to = timeMillis + int64(windowMillis)
 	}
-	timeStepMillis := int64(timeStepSeconds * 1000)
 
-	for millis := fromTimeMillis; millis <= toTimeMillis; millis += timeStepMillis {
-		generated, err := GenerateNumber(base32Secret, millis, timeStepSeconds)
+	stepMillis := int64(timeStepSeconds * 1000)
+	for millis := from; millis <= to; millis += stepMillis {
+		gen, err := GenerateNumber(base32Secret, millis, timeStepSeconds)
 		if err != nil {
 			return false, err
 		}
-		if generated == authNumber {
+		if gen == authNumber {
 			return true, nil
 		}
 	}
 	return false, nil
 }
 
-// GenerateNumber generates the TOTP code for given timestamp and step.
+// GenerateNumber generates TOTP number for a given time
 func GenerateNumber(base32Secret string, timeMillis int64, timeStepSeconds int) (int, error) {
-	key, err := DecodeBase32(base32Secret)
+	key, err := decodeBase32(base32Secret)
 	if err != nil {
 		return 0, err
 	}
@@ -69,29 +88,37 @@ func GenerateNumber(base32Secret string, timeMillis int64, timeStepSeconds int) 
 		value >>= 8
 	}
 
-	mac := hmac.New(sha1.New, key)
-	mac.Write(data)
-	hash := mac.Sum(nil)
-
+	h := hmac.New(sha1.New, key)
+	h.Write(data)
+	hash := h.Sum(nil)
 	offset := hash[len(hash)-1] & 0x0F
-	truncatedHash := int64(0)
-	for i := 0; i < 4; i++ {
-		truncatedHash <<= 8
-		truncatedHash |= int64(hash[int(offset)+i] & 0xFF)
+
+	truncated := int64((int(hash[offset]&0x7F) << 24) |
+		(int(hash[offset+1]&0xFF) << 16) |
+		(int(hash[offset+2]&0xFF) << 8) |
+		(int(hash[offset+3] & 0xFF)))
+
+	truncated = truncated % 1000000
+	return int(truncated), nil
+}
+
+// --- Helper functions ---
+
+func zeroPrepend(num, digits int) string {
+	s := strconv.Itoa(num)
+	if len(s) >= digits {
+		return s
 	}
-	truncatedHash &= 0x7FFFFFFF
-	truncatedHash %= 1000000
-
-	return int(truncatedHash), nil
+	return strings.Repeat("0", digits-len(s)) + s
 }
 
-// ZeroPrepend pads a number with zeros to required digits.
-func ZeroPrepend(num, digits int) string {
-	return fmt.Sprintf("%0*d", digits, num)
-}
-
-// DecodeBase32 decodes a Base32 string (case-insensitive, no padding).
-func DecodeBase32(str string) ([]byte, error) {
-	str = strings.ToUpper(str)
-	return base32.StdEncoding.WithPadding(base32.NoPadding).DecodeString(str)
+func decodeBase32(secret string) ([]byte, error) {
+	secret = strings.ToUpper(strings.ReplaceAll(secret, " ", ""))
+	decoder := base32.StdEncoding.WithPadding(base32.NoPadding)
+	key, err := decoder.DecodeString(secret)
+	if err != nil {
+		fmt.Println("invalid base32 secret", err)
+		return nil, errors.New("invalid base32 secret")
+	}
+	return key, nil
 }

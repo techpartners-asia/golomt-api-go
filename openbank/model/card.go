@@ -6,6 +6,10 @@ type (
 		CivilRegisterNo string `json:"civilRegisterNo" validate:"required"`
 		// Байгууллагын РД
 		CorporateRegisterNo string `json:"corpRegisterNo" validate:"required"`
+		// Дахин давтагдашгүй дугаар бөгөөд тус хүсэлтийг илтгэнэ.
+		State string `json:"state"`
+		// Тус хүсэлтийг encrypt хийсэн утга
+		Scope string `json:"scope"`
 	}
 	TokenizeResp struct {
 		// Статус
@@ -22,7 +26,7 @@ type (
 		// Карт эзэмшигч иргэний РД
 		CivilRegisterNo string `json:"civilRegisterNo" validate:"required"`
 		// Байгууллагын РД
-		CorporateRegisterNo string `json:"corporateRegisterNo" validate:"required"`
+		CorporateRegisterNo string `json:"corpRegisterNo" validate:"required"`
 	}
 	TokenCloseResp struct {
 		// Статус

@@ -1,6 +1,7 @@
 package openbank
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -13,6 +14,12 @@ func (o *openbank) CardTokenize(body model.TokenizeReq) (*model.TokenizeResp, er
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
+
+	jsonBody, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(string(jsonBody))
 	client := resty.New()
 	defer client.Close()
 	var response []byte
@@ -29,14 +36,17 @@ func (o *openbank) CardTokenize(body model.TokenizeReq) (*model.TokenizeResp, er
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     body.State,
+			"scope":     body.Scope,
 		}).
 		Post(o.url + "/v1/card/corp/tokenize")
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println(res.Request.RawRequest.URL.String())
+
 	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		if len(response) == 0 {
@@ -56,6 +66,13 @@ func (o *openbank) CardTokenClose(body model.TokenCloseReq) (*model.TokenCloseRe
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
+
+	jsonBody, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(string(jsonBody))
+
 	client := resty.New()
 	defer client.Close()
 	var response []byte
@@ -121,15 +138,19 @@ func (o *openbank) CardPurchase(body model.CardPurchaseReq) (*model.CardPurchase
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
-		Post(o.url + "/v1/card/purchase")
+		Post(o.url + "/v1/card/purchase/")
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Println(res.Request.RawRequest.URL.String())
+
 	response = res.Bytes()
+	fmt.Println(res.String())
 	if res.StatusCode() != 200 {
 		if len(response) == 0 {
 			return nil, fmt.Errorf("%s-Golomt CG card purchase response: %s", time.Now().Format("20060102150405"), res.Status())
@@ -154,6 +175,11 @@ func (o *openbank) CardPurchaseCheck(body model.CardPurchaseCheckReq) (*model.Ca
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
+	jsonBody, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(string(jsonBody))
 	client := resty.New()
 	defer client.Close()
 	var response []byte
@@ -170,9 +196,9 @@ func (o *openbank) CardPurchaseCheck(body model.CardPurchaseCheckReq) (*model.Ca
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		Post(o.url + "/v1/card/tran/inq")
 	if err != nil {
@@ -180,6 +206,7 @@ func (o *openbank) CardPurchaseCheck(body model.CardPurchaseCheckReq) (*model.Ca
 	}
 
 	response = res.Bytes()
+	fmt.Println(res.String())
 	if res.StatusCode() != 200 {
 		if len(response) == 0 {
 			return nil, fmt.Errorf("%s-Golomt CG card purchase check response: %s", time.Now().Format("20060102150405"), res.Status())
