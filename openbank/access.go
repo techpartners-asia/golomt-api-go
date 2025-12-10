@@ -9,32 +9,32 @@ import (
 )
 
 func (o *openbank) auth() error {
-	if o.authObject != nil {
-		// 4.2.	Холболт шинэчлэх
-		if o.expireTime.After(time.Now()) {
-			return nil
-		}
-		client := resty.New()
-		defer client.Close()
-		var response *model.AuthResp
-		var errResp *model.ErrorResp
-		res, err := client.R().
-			SetHeader("Content-Type", "application/json").
-			SetHeader("X-Golomt-Service", "LGIN").
-			SetHeader("Authorization", "Bearer "+o.authObject.RefreshToken).
-			SetResult(&response).
-			SetError(&errResp).
-			Get(o.url + "/v1/auth/refresh")
-		if err != nil {
-			return err
-		}
-		if res.IsError() {
-			return fmt.Errorf("%s-Golomt CG auth response: %s", time.Now().Format("20060102150405"), errResp.Message)
-		}
-		o.authObject = response
-		o.expireTime = time.Now().Add(time.Duration(response.ExpiresIn) * time.Second)
-		return nil
-	}
+	// if o.authObject != nil {
+	// 	// 4.2.	Холболт шинэчлэх
+	// 	if o.expireTime.After(time.Now()) {
+	// 		return nil
+	// 	}
+	// 	client := resty.New()
+	// 	defer client.Close()
+	// 	var response *model.AuthResp
+	// 	var errResp *model.ErrorResp
+	// 	res, err := client.R().
+	// 		SetHeader("Content-Type", "application/json").
+	// 		SetHeader("X-Golomt-Service", "LGIN").
+	// 		SetHeader("Authorization", "Bearer "+o.authObject.RefreshToken).
+	// 		SetResult(&response).
+	// 		SetError(&errResp).
+	// 		Get(o.url + "/v1/auth/refresh")
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	if res.IsError() {
+	// 		return fmt.Errorf("%s-Golomt CG auth response: %s", time.Now().Format("20060102150405"), errResp.Message)
+	// 	}
+	// 	o.authObject = response
+	// 	o.expireTime = time.Now().Add(time.Duration(response.ExpiresIn) * time.Second)
+	// 	return nil
+	// }
 	var aesError error
 	request := model.AuthReq{
 		Name: o.username,
