@@ -23,12 +23,12 @@ func (o *openbank) auth() error {
 	// 		SetHeader("X-Golomt-Service", "LGIN").
 	// 		SetHeader("Authorization", "Bearer "+o.authObject.RefreshToken).
 	// 		SetResult(&response).
-	// 		SetError(&errResp).
+	// 		SetResultError(&errResp).
 	// 		Get(o.url + "/v1/auth/refresh")
 	// 	if err != nil {
 	// 		return err
 	// 	}
-	// 	if res.IsError() {
+	// 	if res.IsStatusFailure() {
 	// 		return fmt.Errorf("%s-Golomt CG auth response: %s", time.Now().Format("20060102150405"), errResp.Message)
 	// 	}
 	// 	o.authObject = response
@@ -60,12 +60,12 @@ func (o *openbank) auth() error {
 		SetHeader("X-Golomt-Service", "LGIN").
 		SetBody(request).
 		SetResult(&response).
-		SetError(&errResp).
+		SetResultError(&errResp).
 		Post(o.url + "/v1/auth/login")
 	if err != nil {
 		return err
 	}
-	if res.IsError() {
+	if res.IsStatusFailure() {
 		msg := ""
 		if errResp != nil {
 			msg = errResp.Message

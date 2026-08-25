@@ -50,7 +50,7 @@ func (s socialPay) CreateInvoiceQR(input InvoiceInput) (*CommonResponse, error) 
 	if err != nil {
 		return nil, err
 	}
-	if res.IsError() {
+	if res.IsStatusFailure() {
 		return nil, fmt.Errorf("golomt socialpay: http %d: %s", res.StatusCode(), res.String())
 	}
 	if response == nil {
@@ -84,7 +84,7 @@ func (s socialPay) CreateInvoicePhone(input InvoicePhoneInput) (*CommonResponse,
 	if err != nil {
 		return nil, err
 	}
-	if res.IsError() {
+	if res.IsStatusFailure() {
 		return nil, fmt.Errorf("golomt socialpay: http %d: %s", res.StatusCode(), res.String())
 	}
 	if response == nil {
@@ -117,7 +117,7 @@ func (s socialPay) CancelInvoice(input InvoiceInput) (*CommonResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	if res.IsError() {
+	if res.IsStatusFailure() {
 		return nil, fmt.Errorf("golomt socialpay: http %d: %s", res.StatusCode(), res.String())
 	}
 	if response == nil {
@@ -150,7 +150,7 @@ func (s socialPay) CheckInvoice(input InvoiceInput) (*InvoiceResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	if res.IsError() {
+	if res.IsStatusFailure() {
 		return nil, fmt.Errorf("golomt socialpay: http %d: %s", res.StatusCode(), res.String())
 	}
 	if response == nil {
@@ -183,7 +183,7 @@ func (s socialPay) CancelPayment(input InvoiceInput) (*InvoiceResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	if res.IsError() {
+	if res.IsStatusFailure() {
 		return nil, fmt.Errorf("golomt socialpay: http %d: %s", res.StatusCode(), res.String())
 	}
 	if response == nil {
@@ -215,7 +215,7 @@ func (s socialPay) Settlement(settlementId string) (*SettlementResponse, error) 
 	if err != nil {
 		return nil, err
 	}
-	if res.IsError() {
+	if res.IsStatusFailure() {
 		return nil, fmt.Errorf("golomt socialpay: http %d: %s", res.StatusCode(), res.String())
 	}
 	if response == nil {
