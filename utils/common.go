@@ -37,18 +37,41 @@ func AppendAsString(args ...interface{}) string {
 }
 
 func GetValidString(source interface{}) string {
-	if source == nil {
+	switch v := source.(type) {
+	case string:
+		return v
+	case float64:
+		// encoding/json decodes every JSON number into a float64.
+		return strconv.FormatFloat(v, 'f', -1, 64)
+	case bool:
+		return strconv.FormatBool(v)
+	default:
+		// nil, objects and arrays have no sensible string form.
 		return ""
-	} else {
-		return source.(string)
 	}
 }
 
 func GetValidFloat(source interface{}) float64 {
-	if source == nil {
-		return float64(0)
-	} else {
-		num, _ := strconv.ParseFloat(source.(string), 64)
+	switch v := source.(type) {
+	case float64:
+		return v
+	case string:
+		// Some responses quote their numbers.
+		num, _ := strconv.ParseFloat(v, 64)
 		return num
+	default:
+		return 0
+	}
+}
+
+func GetValidInt(source interface{}) int {
+	switch v := source.(type) {
+	case float64:
+		return int(v)
+	case string:
+		num, _ := strconv.Atoi(v)
+		return num
+	default:
+		return 0
 	}
 }

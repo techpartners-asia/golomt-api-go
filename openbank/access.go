@@ -66,7 +66,19 @@ func (o *openbank) auth() error {
 		return err
 	}
 	if res.IsError() {
-		return fmt.Errorf("%s-Golomt CG auth response: %s", time.Now().Format("20060102150405"), errResp.Message)
+		msg := ""
+		if errResp != nil {
+			msg = errResp.Message
+		}
+		if msg == "" {
+			// The failure body was not JSON (proxy error page, empty body), so
+			// nothing was unmarshalled into errResp.
+			msg = fmt.Sprintf("http %d: %s", res.StatusCode(), res.String())
+		}
+		return fmt.Errorf("%s-Golomt CG auth response: %s", time.Now().Format("20060102150405"), msg)
+	}
+	if response == nil {
+		return fmt.Errorf("%s-Golomt CG auth response: empty response body (http %d)", time.Now().Format("20060102150405"), res.StatusCode())
 	}
 	o.authObject = response
 	o.expireTime = time.Now().Add(time.Duration(response.ExpiresIn) * time.Second)

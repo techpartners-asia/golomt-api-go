@@ -27,7 +27,7 @@ func mapToInvoiceResponse(resp map[string]interface{}) (response InvoiceResponse
 func mapToSettlementResponse(resp map[string]interface{}) (response SettlementResponse) {
 	response = SettlementResponse{
 		Amount: utils.GetValidFloat(resp["amount"]),
-		Count:  resp["count"].(int),
+		Count:  utils.GetValidInt(resp["count"]),
 		Status: utils.GetValidString(resp["status"]),
 	}
 	return

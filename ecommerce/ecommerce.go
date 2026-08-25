@@ -76,7 +76,10 @@ func (g *golomtEcommerce) PayTokenPayment(input PayTokenInput) (*PayTokenPayment
 		return nil, err
 	}
 	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+		return nil, fmt.Errorf("golomt ecommerce: http %d: %s", res.StatusCode(), res.String())
+	}
+	if response == nil {
+		return nil, fmt.Errorf("golomt ecommerce: empty response body (http %d)", res.StatusCode())
 	}
 	if response.ErrorCode != "000" {
 		return nil, fmt.Errorf("%s", response.ErrorDesc)
@@ -117,7 +120,10 @@ func (g *golomtEcommerce) CheckTokenPayment(transactionId string) (*CheckTokenPa
 		return nil, err
 	}
 	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+		return nil, fmt.Errorf("golomt ecommerce: http %d: %s", res.StatusCode(), res.String())
+	}
+	if response == nil {
+		return nil, fmt.Errorf("golomt ecommerce: empty response body (http %d)", res.StatusCode())
 	}
 	if response.ErrorCode != "000" {
 		return nil, fmt.Errorf("%s", response.ErrorDesc)
@@ -177,7 +183,10 @@ func (g *golomtEcommerce) CreateInvoice(input CreateInvoiceInput) (*CreateInvoic
 		return nil, err
 	}
 	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+		return nil, fmt.Errorf("golomt ecommerce: http %d: %s", res.StatusCode(), res.String())
+	}
+	if response == nil {
+		return nil, fmt.Errorf("golomt ecommerce: empty response body (http %d)", res.StatusCode())
 	}
 	// if response.ErrorCode != "000" {
 	// 	return nil, fmt.Errorf("%s", response.ErrorDesc)
@@ -220,7 +229,10 @@ func (g *golomtEcommerce) Inquiry(transactionId string) (*InquiryResponse, error
 		return nil, err
 	}
 	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+		return nil, fmt.Errorf("golomt ecommerce: http %d: %s", res.StatusCode(), res.String())
+	}
+	if response == nil {
+		return nil, fmt.Errorf("golomt ecommerce: empty response body (http %d)", res.StatusCode())
 	}
 	if response.ErrorCode != "000" {
 		return nil, fmt.Errorf("%s", response.ErrorDesc)
@@ -304,7 +316,10 @@ func (g *golomtEcommerce) CreateToken(input CreateTokenInput) (*CreateTokenRespo
 		return nil, err
 	}
 	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+		return nil, fmt.Errorf("golomt ecommerce: http %d: %s", res.StatusCode(), res.String())
+	}
+	if response == nil {
+		return nil, fmt.Errorf("golomt ecommerce: empty response body (http %d)", res.StatusCode())
 	}
 	// Verify checksum
 	expectedChecksum := utils.GenerateHMAC(g.secret, utils.AppendAsString(
@@ -341,7 +356,10 @@ func (g *golomtEcommerce) CheckToken(transactionId string) (*CheckTokenResponse,
 		return nil, err
 	}
 	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+		return nil, fmt.Errorf("golomt ecommerce: http %d: %s", res.StatusCode(), res.String())
+	}
+	if response == nil {
+		return nil, fmt.Errorf("golomt ecommerce: empty response body (http %d)", res.StatusCode())
 	}
 	if response.ErrorCode != "000" {
 		return nil, fmt.Errorf("%s", response.ErrorDesc)
@@ -383,7 +401,10 @@ func (g *golomtEcommerce) GetSettlementDetails(input GetSettlementDetailsInput) 
 		return nil, err
 	}
 	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+		return nil, fmt.Errorf("golomt ecommerce: http %d: %s", res.StatusCode(), res.String())
+	}
+	if response == nil {
+		return nil, fmt.Errorf("golomt ecommerce: empty response body (http %d)", res.StatusCode())
 	}
 	return response, nil
 }

@@ -51,7 +51,10 @@ func (s socialPay) CreateInvoiceQR(input InvoiceInput) (*CommonResponse, error) 
 		return nil, err
 	}
 	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+		return nil, fmt.Errorf("golomt socialpay: http %d: %s", res.StatusCode(), res.String())
+	}
+	if response == nil {
+		return nil, fmt.Errorf("golomt socialpay: empty response body (http %d)", res.StatusCode())
 	}
 	if response.Header.Code != 200 {
 		errorResponse := mapToErrorResponse(response.Body.Error)
@@ -82,7 +85,10 @@ func (s socialPay) CreateInvoicePhone(input InvoicePhoneInput) (*CommonResponse,
 		return nil, err
 	}
 	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+		return nil, fmt.Errorf("golomt socialpay: http %d: %s", res.StatusCode(), res.String())
+	}
+	if response == nil {
+		return nil, fmt.Errorf("golomt socialpay: empty response body (http %d)", res.StatusCode())
 	}
 	if response.Header.Code != 200 {
 		errorResponse := mapToErrorResponse(response.Body.Error)
@@ -112,7 +118,10 @@ func (s socialPay) CancelInvoice(input InvoiceInput) (*CommonResponse, error) {
 		return nil, err
 	}
 	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+		return nil, fmt.Errorf("golomt socialpay: http %d: %s", res.StatusCode(), res.String())
+	}
+	if response == nil {
+		return nil, fmt.Errorf("golomt socialpay: empty response body (http %d)", res.StatusCode())
 	}
 	if response.Header.Code != 200 {
 		errorResponse := mapToErrorResponse(response.Body.Error)
@@ -142,7 +151,10 @@ func (s socialPay) CheckInvoice(input InvoiceInput) (*InvoiceResponse, error) {
 		return nil, err
 	}
 	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+		return nil, fmt.Errorf("golomt socialpay: http %d: %s", res.StatusCode(), res.String())
+	}
+	if response == nil {
+		return nil, fmt.Errorf("golomt socialpay: empty response body (http %d)", res.StatusCode())
 	}
 	if response.Header.Code != 200 {
 		errorResponse := mapToErrorResponse(response.Body.Error)
@@ -172,7 +184,10 @@ func (s socialPay) CancelPayment(input InvoiceInput) (*InvoiceResponse, error) {
 		return nil, err
 	}
 	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+		return nil, fmt.Errorf("golomt socialpay: http %d: %s", res.StatusCode(), res.String())
+	}
+	if response == nil {
+		return nil, fmt.Errorf("golomt socialpay: empty response body (http %d)", res.StatusCode())
 	}
 	if response.Header.Code != 200 {
 		errorResponse := mapToErrorResponse(response.Body.Error)
@@ -201,7 +216,10 @@ func (s socialPay) Settlement(settlementId string) (*SettlementResponse, error) 
 		return nil, err
 	}
 	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+		return nil, fmt.Errorf("golomt socialpay: http %d: %s", res.StatusCode(), res.String())
+	}
+	if response == nil {
+		return nil, fmt.Errorf("golomt socialpay: empty response body (http %d)", res.StatusCode())
 	}
 	if response.Header.Code != 200 {
 		errorResponse := mapToErrorResponse(response.Body.Error)
