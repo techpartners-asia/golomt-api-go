@@ -50,8 +50,8 @@ func (s socialPay) CreateInvoiceQR(input InvoiceInput) (*CommonResponse, error) 
 	if err != nil {
 		return nil, err
 	}
-	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+	if res.IsStatusFailure() {
+		return nil, errors.New(res.ResultError().(string))
 	}
 	if response.Header.Code != 200 {
 		errorResponse := mapToErrorResponse(response.Body.Error)
@@ -81,8 +81,8 @@ func (s socialPay) CreateInvoicePhone(input InvoicePhoneInput) (*CommonResponse,
 	if err != nil {
 		return nil, err
 	}
-	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+	if res.IsStatusFailure() {
+		return nil, errors.New(res.ResultError().(string))
 	}
 	if response.Header.Code != 200 {
 		errorResponse := mapToErrorResponse(response.Body.Error)
@@ -111,8 +111,8 @@ func (s socialPay) CancelInvoice(input InvoiceInput) (*CommonResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+	if res.IsStatusFailure() {
+		return nil, errors.New(res.ResultError().(string))
 	}
 	if response.Header.Code != 200 {
 		errorResponse := mapToErrorResponse(response.Body.Error)
@@ -141,8 +141,8 @@ func (s socialPay) CheckInvoice(input InvoiceInput) (*InvoiceResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+	if res.IsStatusFailure() {
+		return nil, errors.New(res.ResultError().(string))
 	}
 	if response.Header.Code != 200 {
 		errorResponse := mapToErrorResponse(response.Body.Error)
@@ -171,8 +171,8 @@ func (s socialPay) CancelPayment(input InvoiceInput) (*InvoiceResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+	if res.IsStatusFailure() {
+		return nil, errors.New(res.ResultError().(string))
 	}
 	if response.Header.Code != 200 {
 		errorResponse := mapToErrorResponse(response.Body.Error)
@@ -200,8 +200,8 @@ func (s socialPay) Settlement(settlementId string) (*SettlementResponse, error) 
 	if err != nil {
 		return nil, err
 	}
-	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+	if res.IsStatusFailure() {
+		return nil, errors.New(res.ResultError().(string))
 	}
 	if response.Header.Code != 200 {
 		errorResponse := mapToErrorResponse(response.Body.Error)

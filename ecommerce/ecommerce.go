@@ -75,8 +75,8 @@ func (g *golomtEcommerce) PayTokenPayment(input PayTokenInput) (*PayTokenPayment
 	if err != nil {
 		return nil, err
 	}
-	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+	if res.IsStatusFailure() {
+		return nil, errors.New(res.ResultError().(string))
 	}
 	if response.ErrorCode != "000" {
 		return nil, fmt.Errorf("%s", response.ErrorDesc)
@@ -116,8 +116,8 @@ func (g *golomtEcommerce) CheckTokenPayment(transactionId string) (*CheckTokenPa
 	if err != nil {
 		return nil, err
 	}
-	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+	if res.IsStatusFailure() {
+		return nil, errors.New(res.ResultError().(string))
 	}
 	if response.ErrorCode != "000" {
 		return nil, fmt.Errorf("%s", response.ErrorDesc)
@@ -176,8 +176,8 @@ func (g *golomtEcommerce) CreateInvoice(input CreateInvoiceInput) (*CreateInvoic
 	if err != nil {
 		return nil, err
 	}
-	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+	if res.IsStatusFailure() {
+		return nil, errors.New(res.ResultError().(string))
 	}
 	// if response.ErrorCode != "000" {
 	// 	return nil, fmt.Errorf("%s", response.ErrorDesc)
@@ -219,8 +219,8 @@ func (g *golomtEcommerce) Inquiry(transactionId string) (*InquiryResponse, error
 	if err != nil {
 		return nil, err
 	}
-	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+	if res.IsStatusFailure() {
+		return nil, errors.New(res.ResultError().(string))
 	}
 	if response.ErrorCode != "000" {
 		return nil, fmt.Errorf("%s", response.ErrorDesc)
@@ -303,8 +303,8 @@ func (g *golomtEcommerce) CreateToken(input CreateTokenInput) (*CreateTokenRespo
 	if err != nil {
 		return nil, err
 	}
-	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+	if res.IsStatusFailure() {
+		return nil, errors.New(res.ResultError().(string))
 	}
 	// Verify checksum
 	expectedChecksum := utils.GenerateHMAC(g.secret, utils.AppendAsString(
@@ -340,8 +340,8 @@ func (g *golomtEcommerce) CheckToken(transactionId string) (*CheckTokenResponse,
 	if err != nil {
 		return nil, err
 	}
-	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+	if res.IsStatusFailure() {
+		return nil, errors.New(res.ResultError().(string))
 	}
 	if response.ErrorCode != "000" {
 		return nil, fmt.Errorf("%s", response.ErrorDesc)
@@ -382,8 +382,8 @@ func (g *golomtEcommerce) GetSettlementDetails(input GetSettlementDetailsInput) 
 	if err != nil {
 		return nil, err
 	}
-	if res.IsError() {
-		return nil, errors.New(res.Error().(string))
+	if res.IsStatusFailure() {
+		return nil, errors.New(res.ResultError().(string))
 	}
 	return response, nil
 }
@@ -405,7 +405,7 @@ func (g *golomtEcommerce) Refund(txnID string) (*RefundResponse, error) {
 		return nil, err
 	}
 
-	if res.IsError() {
+	if res.IsStatusFailure() {
 		return nil, errors.New(res.String())
 	}
 
