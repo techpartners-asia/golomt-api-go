@@ -113,7 +113,7 @@ type (
 		TransactionID string `json:"tranId"`
 		// Гүйлгээ хийгдсэн огноо.
 		TransactionDate string `json:"tranDate"`
-		// Гүйлгээний төлөв. SUCCESS - амжилттай, FAILED - амжилтгүй
+		// Гүйлгээний төлөв. Жишээ: POS
 		TransactionStatus string `json:"tranStatus"`
 	}
 
@@ -208,7 +208,7 @@ type (
 		TransactionID string `json:"tranId"`
 		// Гүйлгээ гарсан огноо
 		TransactionDate string `json:"tranDate"`
-		// Гүйлгээний төлөв
+		// Гүйлгээний төлөв. Жишээ: POS
 		TransactionStatus string `json:"tranStatus"`
 	}
 

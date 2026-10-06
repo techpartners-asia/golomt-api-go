@@ -102,52 +102,7 @@ func (o *openbank) TransactionOtherBank(body model.TransactionReq) (*model.Trans
 
 // 8.3. Байгууллага өөрийн дансаас гүйлгээ хийх
 func (o *openbank) TransactionSelf(body model.TransactionSelfReq) (*model.TransactionSelfResp, error) {
-	if err := o.auth(); err != nil {
-		return nil, err
-	}
-	client := resty.New()
-	defer client.Close()
-	var response []byte
-	res, err := client.R().
-		SetHeader("Content-Type", "application/json").
-		SetHeader("X-Golomt-Service", "CGWTXNADD").
-		SetHeader("X-Golomt-Code", func() string {
-			code, err := GenerateCurrentNumberString(o.xGolomtKey)
-			if err != nil {
-				return ""
-			}
-			return code
-		}()).
-		SetHeader("X-Golomt-Checksum", func() string {
-			checksum, err := o.bodyChecksum(body)
-			if err != nil {
-				return ""
-			}
-			return checksum
-		}()).
-		SetHeader("Authorization", "Bearer "+o.authObject.Token).
-		SetBody(bodyReader(body)).
-		SetQueryParams(map[string]string{
-			"client_id": o.clientID,
-			"state":     o.state,
-			"scope":     o.scope,
-		}).
-		Post(o.url + "/v1/transaction/cgw/transfer")
-	if err != nil {
-		return nil, err
-	}
-	response = res.Bytes()
-	if res.StatusCode() != 200 {
-		if len(response) == 0 {
-			return nil, fmt.Errorf("%s-Golomt CG transaction self response: %s", time.Now().Format("20060102150405"), res.Status())
-		}
-		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
-		if err != nil {
-			return nil, err
-		}
-		return nil, fmt.Errorf("%s-Golomt CG transaction self response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
-	}
-	return parseEncryptedResponse[*model.TransactionSelfResp](response, o.DecryptAESCBC)
+	return postEncrypted[*model.TransactionSelfResp](o, "CGWTXNADD", "/v1/transaction/cgw/transfer", body, requestOption{withCode: true})
 }
 
 // 8.6. Гүйлгээ буцаах
@@ -238,103 +193,24 @@ func (o *openbank) TransactionCheck(body model.TransactionCheckReq) (*model.Tran
 
 // 8.8. Багц гүйлгээ хийх
 func (o *openbank) TransactionBatch(body model.TransactionBatchReq) (*model.TransactionBatchResp, error) {
-	if err := o.auth(); err != nil {
-		return nil, err
-	}
-	client := resty.New()
-	defer client.Close()
-
-	var response []byte
-	res, err := client.R().
-		SetHeader("Content-Type", "application/json").
-		SetHeader("X-Golomt-Service", "CGWBLKTXN").
-		SetHeader("X-Golomt-Checksum", func() string {
-			checksum, err := o.bodyChecksum(body)
-			if err != nil {
-				return ""
-			}
-			return checksum
-		}()).
-		SetQueryParams(map[string]string{
-			"client_id": o.clientID,
-			"state":     o.state,
-			"scope":     o.scope,
-		}).
-		SetHeader("X-Golomt-Code", func() string {
-			code, err := GenerateCurrentNumberString(o.xGolomtKey)
-			if err != nil {
-				return ""
-			}
-			return code
-		}()).
-		SetHeader("Authorization", "Bearer "+o.authObject.Token).
-		SetBody(bodyReader(body)).
-		Post(o.url + "/v1/transaction/cgw/bulk")
-	if err != nil {
-		return nil, err
-	}
-	response = res.Bytes()
-	if res.StatusCode() != 200 {
-		if len(response) == 0 {
-			return nil, fmt.Errorf("%s-Golomt CG transaction batch response: %s", time.Now().Format("20060102150405"), res.Status())
-		}
-		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
-		if err != nil {
-			return nil, err
-		}
-		return nil, fmt.Errorf("%s-Golomt CG transaction batch response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
-	}
-	return parseEncryptedResponse[*model.TransactionBatchResp](response, o.DecryptAESCBC)
+	return postEncrypted[*model.TransactionBatchResp](o, "CGWBLKTXN", "/v1/transaction/cgw/bulk", body, requestOption{withCode: true})
 }
 
 // 8.9. Багц гүйлгээний төлөв шалгах
 func (o *openbank) TransactionBatchCheck(body model.TransactionBatchCheckReq, page model.PageReq) (*model.TransactionBatchCheckResp, error) {
-	if err := o.auth(); err != nil {
-		return nil, err
-	}
-	client := resty.New()
-	defer client.Close()
-
-	var response []byte
-	res, err := client.R().
-		SetHeader("Content-Type", "application/json").
-		SetHeader("X-Golomt-Service", "CGWBLKINQ").
-		SetHeader("X-Golomt-Checksum", func() string {
-			checksum, err := o.bodyChecksum(body)
-			if err != nil {
-				return ""
-			}
-			return checksum
-		}()).
-		SetQueryParams(map[string]string{
-			"client_id": o.clientID,
-			"state":     o.state,
-			"scope":     o.scope,
-		}).
-		SetQueryParams(map[string]string{
-			"page_no":   page.PageNo,
-			"page_size": page.PageSize,
-			"sort":      page.Sort,
-			"sort_by":   page.SortBy,
-		}).
-		SetHeader("Authorization", "Bearer "+o.authObject.Token).
-		SetBody(bodyReader(body)).
-		Post(o.url + "/v1/transaction/cgw/bulk/inq")
-	if err != nil {
-		return nil, err
-	}
-	response = res.Bytes()
-	if res.StatusCode() != 200 {
-		if len(response) == 0 {
-			return nil, fmt.Errorf("%s-Golomt CG transaction batch check response: %s", time.Now().Format("20060102150405"), res.Status())
+	// SPEC: &page_no=0&page_size=10&sort=desc&sort_by=id (хоосон утгыг илгээхгүй)
+	query := map[string]string{}
+	for k, v := range map[string]string{
+		"page_no":   page.PageNo,
+		"page_size": page.PageSize,
+		"sort":      page.Sort,
+		"sort_by":   page.SortBy,
+	} {
+		if v != "" {
+			query[k] = v
 		}
-		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
-		if err != nil {
-			return nil, err
-		}
-		return nil, fmt.Errorf("%s-Golomt CG transaction batch check response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseEncryptedResponse[*model.TransactionBatchCheckResp](response, o.DecryptAESCBC)
+	return postEncrypted[*model.TransactionBatchCheckResp](o, "CGWBLKINQ", "/v1/transaction/cgw/bulk/inq", body, requestOption{query: query})
 }
 
 // 8.10. Гүйлгээний төлөв шалгах
@@ -387,17 +263,15 @@ func (o *openbank) TransactionBatchFile(input model.TransactionBatchFileInput) (
 		return nil, err
 	}
 	fileName := "batch_transaction_" + time.Now().Format("20060102150405") + ".json"
+	code, err := GenerateCurrentNumberString(o.xGolomtKey)
+	if err != nil {
+		return nil, err
+	}
 
 	var response []byte
 	res, err := client.R().
 		SetHeader("X-Golomt-Service", "CGWTTUM").
-		SetHeader("X-Golomt-Code", func() string {
-			code, err := GenerateCurrentNumberString(o.xGolomtKey)
-			if err != nil {
-				return ""
-			}
-			return code
-		}()).
+		SetHeader("X-Golomt-Code", code).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetQueryParams(map[string]string{
 			"client_id": o.clientID,

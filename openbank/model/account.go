@@ -140,7 +140,7 @@ type (
 
 	AccountTypeInqReq struct {
 		// Дансны дугаар
-		AccountID string `json:"accountId"`
+		AccountID string `json:"accountId" validate:"required"`
 	}
 
 	AccountTypeInqResp struct {

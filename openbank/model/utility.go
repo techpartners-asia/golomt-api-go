@@ -91,7 +91,7 @@ type (
 
 	RateReq struct {
 		// Валют
-		Currency string `json:"currency"`
+		Currency string `json:"currency" validate:"required"`
 	}
 	RateResp struct {
 		// Хүсэлтийн дугаар
