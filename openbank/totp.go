@@ -4,7 +4,6 @@ import (
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha1"
-	"encoding/base32"
 	"errors"
 	"strconv"
 	"strings"
@@ -111,12 +110,69 @@ func zeroPrepend(num, digits int) string {
 	return strings.Repeat("0", digits-len(s)) + s
 }
 
+// decodeBase32 нь SPEC Хавсралт 3-ын Java decodeBase32-ийн яг хуулбар:
+// жижиг/том үсэг зөвшөөрнө, '=' дээр зогсоно, 8-д хуваагдахгүй урттай
+// secret-ийн сүүлийн дутуу byte-ийг мөн нэмнэ.
 func decodeBase32(secret string) ([]byte, error) {
-	secret = strings.ToUpper(strings.ReplaceAll(secret, " ", ""))
-	decoder := base32.StdEncoding.WithPadding(base32.NoPadding)
-	key, err := decoder.DecodeString(secret)
-	if err != nil {
-		return nil, errors.New("invalid base32 secret")
+	secret = strings.ReplaceAll(secret, " ", "")
+	result := make([]byte, 0, (len(secret)*5+7)/8)
+	which := 0
+	working := 0
+	for i := 0; i < len(secret); i++ {
+		ch := secret[i]
+		var val int
+		switch {
+		case ch >= 'a' && ch <= 'z':
+			val = int(ch - 'a')
+		case ch >= 'A' && ch <= 'Z':
+			val = int(ch - 'A')
+		case ch >= '2' && ch <= '7':
+			val = 26 + int(ch-'2')
+		case ch == '=':
+			which = 0
+			i = len(secret)
+			continue
+		default:
+			return nil, errors.New("invalid base32 secret")
+		}
+		switch which {
+		case 0:
+			working = (val & 31) << 3
+			which = 1
+		case 1:
+			working |= (val & 28) >> 2
+			result = append(result, byte(working))
+			working = (val & 3) << 6
+			which = 2
+		case 2:
+			working |= (val & 31) << 1
+			which = 3
+		case 3:
+			working |= (val & 16) >> 4
+			result = append(result, byte(working))
+			working = (val & 15) << 4
+			which = 4
+		case 4:
+			working |= (val & 30) >> 1
+			result = append(result, byte(working))
+			working = (val & 1) << 7
+			which = 5
+		case 5:
+			working |= (val & 31) << 2
+			which = 6
+		case 6:
+			working |= (val & 24) >> 3
+			result = append(result, byte(working))
+			working = (val & 7) << 5
+			which = 7
+		case 7:
+			working |= val & 31
+			result = append(result, byte(working))
+			which = 0
+		}
 	}
-	return key, nil
+	if which != 0 {
+		result = append(result, byte(working))
+	}
+	return result, nil
 }

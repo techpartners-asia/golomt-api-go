@@ -9,7 +9,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
+	"unicode"
 
 	"github.com/techpartners-asia/golomt-api-go/openbank/model"
 	"resty.dev/v3"
@@ -43,9 +45,17 @@ func (g openbank) EncryptAESCBC(text string) (string, error) {
 
 func PKCS7Unpad(data []byte) ([]byte, error) {
 	length := len(data)
+	if length == 0 {
+		return nil, fmt.Errorf("invalid PKCS#7 padding: empty data")
+	}
 	padding := int(data[length-1])
-	if padding > length || padding == 0 {
+	if padding > length || padding == 0 || padding > aes.BlockSize {
 		return nil, fmt.Errorf("invalid PKCS#7 padding")
+	}
+	for _, b := range data[length-padding:] {
+		if int(b) != padding {
+			return nil, fmt.Errorf("invalid PKCS#7 padding")
+		}
 	}
 	return data[:length-padding], nil
 }
@@ -60,10 +70,23 @@ func (g openbank) DecryptAESCBC(ciphertext string) (string, error) {
 		return "", fmt.Errorf("IV length must be %d bytes", aes.BlockSize)
 	}
 
+	// Банкны Java жишээ нь MIME base64 decoder ашигладаг тул мөр шилжилт,
+	// хоосон зай болон JSON string хэлбэрийн хашилтыг (") зөвшөөрнө.
+	ciphertext = strings.Map(func(r rune) rune {
+		if unicode.IsSpace(r) {
+			return -1
+		}
+		return r
+	}, ciphertext)
+	ciphertext = strings.Trim(ciphertext, `"`)
+
 	// Decode the base64-encoded ciphertext
 	decodedCiphertext, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
 		return "", err
+	}
+	if len(decodedCiphertext) == 0 || len(decodedCiphertext)%aes.BlockSize != 0 {
+		return "", fmt.Errorf("invalid ciphertext length %d", len(decodedCiphertext))
 	}
 
 	decrypted := make([]byte, len(decodedCiphertext))
@@ -137,6 +160,10 @@ type requestOption struct {
 	withCode bool
 	// Нэмэлт query параметрүүд (хуудаслалт г.м)
 	query map[string]string
+	// Нэмэлт header-үүд (X-DEVICE-* г.м)
+	headers map[string]string
+	// client_id/state/scope query илгээхгүй (URI-д OAuth query заагаагүй сервисүүд)
+	noScope bool
 }
 
 // postEncrypted нь client_id/state/scope query, checksum-тай POST хүсэлт илгээж,
@@ -157,13 +184,16 @@ func postEncrypted[T any](o *openbank, service, path string, body interface{}, o
 		SetHeader("X-Golomt-Service", service).
 		SetHeader("X-Golomt-Checksum", checksum).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
-		SetQueryParams(map[string]string{
+		SetHeaders(opt.headers).
+		SetQueryParams(opt.query).
+		SetBody(bodyReader(body))
+	if !opt.noScope {
+		req.SetQueryParams(map[string]string{
 			"client_id": o.clientID,
 			"state":     o.state,
 			"scope":     o.scope,
-		}).
-		SetQueryParams(opt.query).
-		SetBody(bodyReader(body))
+		})
+	}
 	if opt.withCode {
 		code, err := GenerateCurrentNumberString(o.xGolomtKey)
 		if err != nil {
@@ -181,8 +211,13 @@ func postEncrypted[T any](o *openbank, service, path string, body interface{}, o
 			return result, fmt.Errorf("%s-Golomt CG %s response: %s", time.Now().Format("20060102150405"), service, res.Status())
 		}
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
-		if err != nil {
-			return result, err
+		if err != nil || errResp == nil {
+			// Gateway түвшний алдаа нууцлагдаагүй (plain JSON/текст) ирж болно
+			if plain, perr := parseResponse[*model.ErrorResp](response); perr == nil && plain != nil {
+				errResp = plain
+			} else {
+				return result, fmt.Errorf("%s-Golomt CG %s response: %s: %s", time.Now().Format("20060102150405"), service, res.Status(), string(response))
+			}
 		}
 		return result, fmt.Errorf("%s-Golomt CG %s response: %s: %s", time.Now().Format("20060102150405"), service, errResp.Message, errResp.DebugMessage)
 	}
@@ -217,8 +252,8 @@ func postPlain[T any](o *openbank, service, path string, body interface{}) (T, e
 			return result, fmt.Errorf("%s-Golomt CG %s response: %s", time.Now().Format("20060102150405"), service, res.Status())
 		}
 		errResp, err := parseResponse[*model.ErrorResp](response)
-		if err != nil {
-			return result, err
+		if err != nil || errResp == nil {
+			return result, fmt.Errorf("%s-Golomt CG %s response: %s: %s", time.Now().Format("20060102150405"), service, res.Status(), string(response))
 		}
 		return result, fmt.Errorf("%s-Golomt CG %s response: %s: %s", time.Now().Format("20060102150405"), service, errResp.Message, errResp.DebugMessage)
 	}
