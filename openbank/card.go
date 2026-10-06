@@ -1,7 +1,6 @@
 package openbank
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -9,17 +8,12 @@ import (
 	"resty.dev/v3"
 )
 
-// 8.1.	Байгууллагын виртуал кредит карт токенжуулах
+// 9.33. Байгууллагын виртуал кредит карт токенжуулах
 func (o *openbank) CardTokenize(body model.TokenizeReq) (string, error) {
 	if err := o.auth(); err != nil {
 		return "", err
 	}
 
-	jsonBody, err := json.Marshal(body)
-	if err != nil {
-		return "", err
-	}
-	fmt.Println(string(jsonBody))
 	client := resty.New()
 	defer client.Close()
 	var response []byte
@@ -37,15 +31,13 @@ func (o *openbank) CardTokenize(body model.TokenizeReq) (string, error) {
 		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
 			"client_id": o.clientID,
-			"state":     body.State,
-			"scope":     body.Scope,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		Post(o.url + "/v1/card/corp/tokenize")
 	if err != nil {
 		return "", err
 	}
-
-	fmt.Println(res.Request.RawRequest.URL.String())
 
 	response = res.Bytes()
 	if res.StatusCode() != 200 {
@@ -64,21 +56,14 @@ func (o *openbank) CardTokenize(body model.TokenizeReq) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Println(responseData)
 	return responseData, nil
 }
 
-// 8.2.	Токен цуцлах
+// 9.34. Токен цуцлах
 func (o *openbank) CardTokenClose(body model.TokenCloseReq) (*model.TokenCloseResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
-
-	jsonBody, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println(string(jsonBody))
 
 	client := resty.New()
 	defer client.Close()
@@ -96,19 +81,13 @@ func (o *openbank) CardTokenClose(body model.TokenCloseReq) (*model.TokenCloseRe
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		Post(o.url + "/v1/card/token/close")
 	if err != nil {
 		return nil, err
-	}
-	response = res.Bytes()
-	if res.StatusCode() != 200 {
-		if len(response) == 0 {
-			return nil, fmt.Errorf("%s-Golomt CG card corporate close response: %s", time.Now().Format("20060102150405"), res.Status())
-		}
 	}
 	response = res.Bytes()
 	if res.StatusCode() != 200 {
@@ -124,7 +103,7 @@ func (o *openbank) CardTokenClose(body model.TokenCloseReq) (*model.TokenCloseRe
 	return parseEncryptedResponse[*model.TokenCloseResp](response, o.DecryptAESCBC)
 }
 
-// 8.3.	Токентэй картнаас гүйлгээ гаргах
+// 9.15. Токентэй картнаас гүйлгээ гаргах
 func (o *openbank) CardPurchase(body model.CardPurchaseReq) (*model.CardPurchaseResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -154,15 +133,6 @@ func (o *openbank) CardPurchase(body model.CardPurchaseReq) (*model.CardPurchase
 		return nil, err
 	}
 
-	fmt.Println(res.Request.RawRequest.URL.String())
-
-	response = res.Bytes()
-	fmt.Println(res.String())
-	if res.StatusCode() != 200 {
-		if len(response) == 0 {
-			return nil, fmt.Errorf("%s-Golomt CG card purchase response: %s", time.Now().Format("20060102150405"), res.Status())
-		}
-	}
 	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		if len(response) == 0 {
@@ -177,16 +147,11 @@ func (o *openbank) CardPurchase(body model.CardPurchaseReq) (*model.CardPurchase
 	return parseEncryptedResponse[*model.CardPurchaseResp](response, o.DecryptAESCBC)
 }
 
-// 8.4.	Картын гүйлгээ шалгах
+// 9.32. Картын гүйлгээ шалгах
 func (o *openbank) CardPurchaseCheck(body model.CardPurchaseCheckReq) (*model.CardPurchaseCheckResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
-	jsonBody, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println(string(jsonBody))
 	client := resty.New()
 	defer client.Close()
 	var response []byte
@@ -213,7 +178,6 @@ func (o *openbank) CardPurchaseCheck(body model.CardPurchaseCheckReq) (*model.Ca
 	}
 
 	response = res.Bytes()
-	fmt.Println(res.String())
 	if res.StatusCode() != 200 {
 		if len(response) == 0 {
 			return nil, fmt.Errorf("%s-Golomt CG card purchase check response: %s", time.Now().Format("20060102150405"), res.Status())
@@ -227,8 +191,7 @@ func (o *openbank) CardPurchaseCheck(body model.CardPurchaseCheckReq) (*model.Ca
 	return parseEncryptedResponse[*model.CardPurchaseCheckResp](response, o.DecryptAESCBC)
 }
 
-// 8.5.	Мерчантын хуулга авах
-
+// 9.23. Мерчантын хуулга авах
 func (o *openbank) CardMerchantStatement(body model.CardMerchantStatementReq, page model.PageReq) (*model.CardMerchantStatementResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -256,9 +219,9 @@ func (o *openbank) CardMerchantStatement(body model.CardMerchantStatementReq, pa
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		SetQueryParams(map[string]string{
 			"page_no":   page.PageNo,
@@ -273,11 +236,16 @@ func (o *openbank) CardMerchantStatement(body model.CardMerchantStatementReq, pa
 		if len(response) == 0 {
 			return nil, fmt.Errorf("%s-Golomt CG card merchant statement response: %s", time.Now().Format("20060102150405"), res.Status())
 		}
+		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
+		if err != nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("%s-Golomt CG card merchant statement response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
 	return parseEncryptedResponse[*model.CardMerchantStatementResp](response, o.DecryptAESCBC)
 }
 
-// 8.6.	Кредит картын дэлгэрэнгүй
+// 9.1.	Кредит картын дэлгэрэнгүй
 func (o *openbank) CardCreditDetail(body model.CardCreditDetailReq) (*model.CardCreditDetailResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -298,9 +266,9 @@ func (o *openbank) CardCreditDetail(body model.CardCreditDetailReq) (*model.Card
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		Post(o.url + "/v1/card/credit/details")
 	if err != nil {
@@ -320,7 +288,7 @@ func (o *openbank) CardCreditDetail(body model.CardCreditDetailReq) (*model.Card
 	return parseEncryptedResponse[*model.CardCreditDetailResp](response, o.DecryptAESCBC)
 }
 
-// 8.7.	Картын гүйлгээний мэдээлэл татах
+// 9.9.	Картын гүйлгээний мэдээлэл татах
 func (o *openbank) CardTransaction(body model.CardTransactionReq) (*model.CardTransactionResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -341,9 +309,9 @@ func (o *openbank) CardTransaction(body model.CardTransactionReq) (*model.CardTr
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		Post(o.url + "/v1/card/transaction-details")
 	if err != nil {
@@ -363,7 +331,7 @@ func (o *openbank) CardTransaction(body model.CardTransactionReq) (*model.CardTr
 	return parseEncryptedResponse[*model.CardTransactionResp](response, o.DecryptAESCBC)
 }
 
-// 8.8.	Кредит карт хуулга харах
+// 9.11. Кредит карт хуулга харах
 func (o *openbank) CardCreditStatement(body model.CardCreditStatementReq) ([]model.CardCreditStatementData, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -384,9 +352,9 @@ func (o *openbank) CardCreditStatement(body model.CardCreditStatementReq) ([]mod
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		Post(o.url + "/v1/card/credit/statement")
 	if err != nil {
@@ -404,4 +372,24 @@ func (o *openbank) CardCreditStatement(body model.CardCreditStatementReq) ([]mod
 		return nil, fmt.Errorf("%s-Golomt CG card credit statement response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
 	return parseEncryptedResponse[[]model.CardCreditStatementData](response, o.DecryptAESCBC)
+}
+
+// 9.2.	Картын жагсаалт (Дебит, Кредит)
+func (o *openbank) CardList(body model.CardListReq) ([]model.CardListData, error) {
+	return postEncrypted[[]model.CardListData](o, "CRDTLST", "/v1/card/list", body, requestOption{})
+}
+
+// 9.35. UnionPay QR үүсгэх
+func (o *openbank) UnionPayQRGenerate(body model.UnionPayQRReq) (*model.UnionPayQRResp, error) {
+	return postEncrypted[*model.UnionPayQRResp](o, "CUNQRG", "/v1/card/union/qrgen", body, requestOption{})
+}
+
+// 9.36. UnionPay токен үүсгэх
+func (o *openbank) UnionPayTokenCreate(body model.UnionPayTokenCreateReq) (*model.UnionPayTokenCreateResp, error) {
+	return postEncrypted[*model.UnionPayTokenCreateResp](o, "CUNTCR", "/v1/card/union/token/create", body, requestOption{})
+}
+
+// 9.37. UnionPay токен өөрчлөх
+func (o *openbank) UnionPayTokenUpdate(body model.UnionPayTokenUpdateReq) (*model.UnionPayTokenUpdateResp, error) {
+	return postEncrypted[*model.UnionPayTokenUpdateResp](o, "CUNTUP", "/v1/card/union/token/update", body, requestOption{})
 }

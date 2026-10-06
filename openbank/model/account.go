@@ -11,7 +11,33 @@ type (
 		StartDate string `json:"startDate" validate:"required"`
 		// Дуусах огноо.
 		// ISO Date форматтай байна
-		EndDate string `json:"endDate"`
+		EndDate string `json:"endDate" validate:"required"`
+	}
+	StatementPageReq struct {
+		// Хуулга авах дансны дугаар
+		AccountID string `json:"accountId" validate:"required"`
+		// Данс эзэмшигчийн регистрийн дугаар
+		RegisterNo string `json:"registerNo" validate:"required"`
+		// Эхлэх огноо. ISO Date форматтай байна
+		StartDate string `json:"startDate" validate:"required"`
+		// Дуусах огноо. ISO Date форматтай байна
+		EndDate string `json:"endDate" validate:"required"`
+		// Хуудасны дугаар
+		Page int `json:"page" validate:"required"`
+		// Татах мөрний тоо
+		Size int `json:"size" validate:"required"`
+	}
+	StatementPageResp struct {
+		// Тухайн дансны дугаар
+		AccountID string `json:"accountId"`
+		// Татсан хуудас
+		CurrentPage int `json:"currentPage"`
+		// Нийт хуудас
+		TotalPages int `json:"totalPages"`
+		// Нийт мөрний тоо
+		TotalSize int `json:"totalSize"`
+		// Дансны хуулганы жагсаалт
+		Statements []Statement `json:"statements"`
 	}
 	StatementResp struct {
 		// Хүсэлтийн дугаар
@@ -65,7 +91,7 @@ type (
 		// Доод үлдэгдэл шилжүүлэх данс. Бүтээгдэхүүний доод үлдэгдэл 0-с их тохиолдолд
 		InitAccount string `json:"initAccount"`
 		// Данс нээх доод үлдэгдэл, хоосон илгээсэн тохиолдолд бүтээгдэхүүний доод лимит-ээр данс үүсгэнэ
-		InitAmount string `json:"initAmount" validate:"required"`
+		InitAmount string `json:"initAmount,omitempty"`
 	}
 
 	AccountAddResp struct {
@@ -101,8 +127,8 @@ type (
 		BranchID string `json:"branchId"`
 		// Social pay холбогдсон эсэх. Y - тийм, N - үгүй
 		IsSocialPayConnected string `json:"isSocialPayConnected"`
-		// Дансны төрөл
-		AccountType AccountType `json:"accountType"`
+		// Бүтээгдэхүүний төрөл
+		SchemeType string `json:"schemeType"`
 	}
 
 	AccountType struct {
@@ -125,7 +151,7 @@ type (
 		// 2.	OPER – харилцах
 		//
 		// 3.	LOAN – зээл
-		AccountType AccountTypeEnum `json:"accountType"`
+		Type AccountTypeEnum `json:"type"`
 	}
 
 	AccountRenameReq struct {
@@ -176,7 +202,7 @@ type (
 		// Харилцах дансны бүтээгдэхүүний нэршил
 		ProductName string `json:"productName"`
 		// Дансны хүүний ханш
-		IntRate int `json:"intRate"`
+		IntRate float64 `json:"intRate"`
 		// Данс нь дээр хамтран бүртгэлтэй эсэх. Y - тийм, N - үгүй
 		IsRelParty string `json:"isRelParty"`
 		// бүтээгдэхүүний мэдээлэл
@@ -208,7 +234,7 @@ type (
 		// Харилцах дансны бүтээгдэхүүний нэршил
 		ProductName string `json:"productName"`
 		// Дансны хүүний ханш
-		IntRate int `json:"intRate"`
+		IntRate float64 `json:"intRate"`
 		// Данс нь дээр хамтран бүртгэлтэй эсэх. Y - тийм, N - үгүй
 		IsRelParty string `json:"isRelParty"`
 		// бүтээгдэхүүний мэдээлэл
@@ -220,7 +246,7 @@ type (
 		// Дансны IBAN дугаар
 		IBAN string `json:"iban"`
 		// Татварын хувь
-		WTaxPercent int `json:"wTaxPcnt"`
+		WTaxPercent float64 `json:"wtaxPcnt"`
 		// Хугацаа нь дуусах огноо
 		// Формат: yyyy-MM-dd
 		MaturityDate string `json:"maturityDate"`
@@ -245,21 +271,21 @@ type (
 		// Дансы товч нэр 10 хүртэлх тэмдэгт байна
 		ShortName string `json:"shortName" validate:"required"`
 		// Банкнаас урдьчилан гэрээний үндсэнд гаргаж өгсөн бүтээгдэхүүний код
-		// Лавлах төрөл: OPER
+		// Лавлах төрөл: DEPO
 		SchemeCode string `json:"schemeCode" validate:"required"`
 		// Тус бүтээгдэхүүнийг нээх боломжтой сар байна
 		TermMonth int `json:"termMonth" validate:"required"`
 		// Данс нээх мөнгөн дүн буюу Бүтээгдэхүүний доод дүнгээс багагүй байна
 		Amount float64 `json:"amount" validate:"required"`
-		// Доод үлдэгдэл шилжүүлэх данс. Бүтээгдэхүүний доод үлдэгдэл 0-с их тохиолдолд
-		InitAccount string `json:"initAccount"`
+		// Хадгаламжийн анхны орлого татах харилцагчийн харилцах дансны дугаар
+		InitAccount string `json:"initAccount" validate:"required"`
 	}
 
 	AccountCustomerDetailReq struct {
 		// Дансны дугаар
 		AccountID string `json:"accountId" validate:"required"`
-		// Тухайн банкны код.
-		BankCode string `json:"bankCode"`
+		// Тухайн банкны код. Голомт бус данс шалгах үед явуулна.
+		BankCode string `json:"bankCode,omitempty"`
 	}
 	AccountOtherBankCustomerDetailResp struct {
 		// Тухайн дансны дугаар зөв эсэх
@@ -319,7 +345,8 @@ type (
 		Value float64 `json:"value"`
 		// Валют
 		Currency string `json:"currency"`
-		// Шилжүүлэг хийх банкны код буюу Голомт банк (15) байна. Лавлах төрөл: BANK
-		Bank string `json:"bank"`
+		// Шилжүүлэг хийх/хүлээж авах банкны код. Лавлах төрөл: BANK
+		// 6.3, 8.8 гүйлгээнд заавал (Голомт банк - 15)
+		Bank string `json:"bank,omitempty"`
 	}
 )

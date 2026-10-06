@@ -1,16 +1,16 @@
 package openbank
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/techpartners-asia/golomt-api-go/openbank/model"
 	"resty.dev/v3"
 )
 
-// 6.1.	Голомт Банк хоорондын гүйлгээ
+// 8.1.	Голомт Банк хоорондын гүйлгээ
 func (o *openbank) TransactionInBank(body model.TransactionReq) (*model.TransactionResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -31,9 +31,9 @@ func (o *openbank) TransactionInBank(body model.TransactionReq) (*model.Transact
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		Post(o.url + "/v1/transaction/internal")
 	if err != nil {
@@ -53,7 +53,7 @@ func (o *openbank) TransactionInBank(body model.TransactionReq) (*model.Transact
 	return parseEncryptedResponse[*model.TransactionResp](response, o.DecryptAESCBC)
 }
 
-// 6.2.	 Бусад банк хоорондын гүйлгээ
+// 8.2.	Бусад банк хоорондын гүйлгээ
 func (o *openbank) TransactionOtherBank(body model.TransactionReq) (*model.TransactionResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -78,9 +78,9 @@ func (o *openbank) TransactionOtherBank(body model.TransactionReq) (*model.Trans
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		Post(o.url + "/v1/transaction/interbank")
 	if err != nil {
@@ -100,7 +100,7 @@ func (o *openbank) TransactionOtherBank(body model.TransactionReq) (*model.Trans
 	return parseEncryptedResponse[*model.TransactionResp](response, o.DecryptAESCBC)
 }
 
-// 6.3. Байгууллага өөрийн дансаас гүйлгээ хийх
+// 8.3. Байгууллага өөрийн дансаас гүйлгээ хийх
 func (o *openbank) TransactionSelf(body model.TransactionSelfReq) (*model.TransactionSelfResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -111,6 +111,13 @@ func (o *openbank) TransactionSelf(body model.TransactionSelfReq) (*model.Transa
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "CGWTXNADD").
+		SetHeader("X-Golomt-Code", func() string {
+			code, err := GenerateCurrentNumberString(o.xGolomtKey)
+			if err != nil {
+				return ""
+			}
+			return code
+		}()).
 		SetHeader("X-Golomt-Checksum", func() string {
 			checksum, err := o.bodyChecksum(body)
 			if err != nil {
@@ -121,9 +128,9 @@ func (o *openbank) TransactionSelf(body model.TransactionSelfReq) (*model.Transa
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		Post(o.url + "/v1/transaction/cgw/transfer")
 	if err != nil {
@@ -143,7 +150,7 @@ func (o *openbank) TransactionSelf(body model.TransactionSelfReq) (*model.Transa
 	return parseEncryptedResponse[*model.TransactionSelfResp](response, o.DecryptAESCBC)
 }
 
-// 6.4. Гүйлгээ буцаах
+// 8.6. Гүйлгээ буцаах
 func (o *openbank) TransactionRefund(body model.TransactionRefundReq) (*model.TransactionRefundResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -162,9 +169,9 @@ func (o *openbank) TransactionRefund(body model.TransactionRefundReq) (*model.Tr
 			return checksum
 		}()).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
@@ -186,7 +193,7 @@ func (o *openbank) TransactionRefund(body model.TransactionRefundReq) (*model.Tr
 	return parseEncryptedResponse[*model.TransactionRefundResp](response, o.DecryptAESCBC)
 }
 
-// 6.5. Гүйлгээ шалгах
+// 8.7. Гүйлгээ шалгах
 func (o *openbank) TransactionCheck(body model.TransactionCheckReq) (*model.TransactionCheckResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -205,9 +212,9 @@ func (o *openbank) TransactionCheck(body model.TransactionCheckReq) (*model.Tran
 			return checksum
 		}()).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
@@ -229,7 +236,7 @@ func (o *openbank) TransactionCheck(body model.TransactionCheckReq) (*model.Tran
 	return parseEncryptedResponse[*model.TransactionCheckResp](response, o.DecryptAESCBC)
 }
 
-// 6.6. Багц гүйлгээ хийх
+// 8.8. Багц гүйлгээ хийх
 func (o *openbank) TransactionBatch(body model.TransactionBatchReq) (*model.TransactionBatchResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -249,9 +256,9 @@ func (o *openbank) TransactionBatch(body model.TransactionBatchReq) (*model.Tran
 			return checksum
 		}()).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		SetHeader("X-Golomt-Code", func() string {
 			code, err := GenerateCurrentNumberString(o.xGolomtKey)
@@ -280,7 +287,7 @@ func (o *openbank) TransactionBatch(body model.TransactionBatchReq) (*model.Tran
 	return parseEncryptedResponse[*model.TransactionBatchResp](response, o.DecryptAESCBC)
 }
 
-// 6.7. Багц гүйлгээний төлөв шалгах
+// 8.9. Багц гүйлгээний төлөв шалгах
 func (o *openbank) TransactionBatchCheck(body model.TransactionBatchCheckReq, page model.PageReq) (*model.TransactionBatchCheckResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -300,9 +307,9 @@ func (o *openbank) TransactionBatchCheck(body model.TransactionBatchCheckReq, pa
 			return checksum
 		}()).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		SetQueryParams(map[string]string{
 			"page_no":   page.PageNo,
@@ -330,7 +337,7 @@ func (o *openbank) TransactionBatchCheck(body model.TransactionBatchCheckReq, pa
 	return parseEncryptedResponse[*model.TransactionBatchCheckResp](response, o.DecryptAESCBC)
 }
 
-// 6.8. Гүйлгээний төлөв шалгах
+// 8.10. Гүйлгээний төлөв шалгах
 func (o *openbank) TransactionConfirm(body model.TransactionConfirmReq) (*model.TransactionConfirmResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -368,32 +375,21 @@ func (o *openbank) TransactionConfirm(body model.TransactionConfirmReq) (*model.
 	return parseEncryptedResponse[*model.TransactionConfirmResp](response, o.DecryptAESCBC)
 }
 
-// 6.9. Багц гүйлгээ файлаар хийх
+// 8.11. Багц гүйлгээ файлаар хийх
 func (o *openbank) TransactionBatchFile(input model.TransactionBatchFileInput) (*model.TransactionBatchFileResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
 	client := resty.New()
 	defer client.Close()
-	fileName := "batch_transaction_" + time.Now().Format("20060102150405") + ".json"
-	file, err := os.Create(fileName)
+	fileContent, err := json.Marshal(input.File)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
-
-	// Encode with indentation for readability
-
-	encoder := json.NewEncoder(file)
-	encoder.SetIndent("", "")
-	if err := encoder.Encode(input.File); err != nil {
-		panic(err)
-	}
-	file.Close()
+	fileName := "batch_transaction_" + time.Now().Format("20060102150405") + ".json"
 
 	var response []byte
 	res, err := client.R().
-		SetHeader("Content-Type", "multipart/form-data").
 		SetHeader("X-Golomt-Service", "CGWTTUM").
 		SetHeader("X-Golomt-Code", func() string {
 			code, err := GenerateCurrentNumberString(o.xGolomtKey)
@@ -404,16 +400,16 @@ func (o *openbank) TransactionBatchFile(input model.TransactionBatchFileInput) (
 		}()).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
-		SetFormData(map[string]string{
+		SetMultipartFormData(map[string]string{
 			"registerNumber": input.RegisterNo,
 			"fileCode":       input.FileCode,
 			"remarks":        input.Remarks,
-			"file":           fileName,
 		}).
+		SetFileReader("file", fileName, bytes.NewReader(fileContent)).
 		Post(o.url + "/v1/transaction/cgw/ttum")
 	if err != nil {
 		return nil, err
@@ -430,4 +426,39 @@ func (o *openbank) TransactionBatchFile(input model.TransactionBatchFileInput) (
 		return nil, fmt.Errorf("%s-Golomt CG transaction batch file response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
 	return parseEncryptedResponse[*model.TransactionBatchFileResp](response, o.DecryptAESCBC)
+}
+
+// 8.4. Гаалийн гүйлгээ хийх
+func (o *openbank) TransactionCustomsPay(body model.CustomsPayReq) (*model.CustomsPayResp, error) {
+	return postEncrypted[*model.CustomsPayResp](o, "CUSPAY", "/v1/payment/custom/pay", body, requestOption{})
+}
+
+// 8.5. Татварын гүйлгээ хийх
+func (o *openbank) TransactionTaxPay(body model.TaxPayReq) (*model.TaxPayResp, error) {
+	return postEncrypted[*model.TaxPayResp](o, "TAXITR", "/v1/transaction/general/tax", body, requestOption{})
+}
+
+// 8.12. Татварын төлбөрийн жагсаалт харах TIN
+func (o *openbank) TaxListByTIN(body model.TaxTINInqReq) ([]model.TaxTINInqData, error) {
+	return postEncrypted[[]model.TaxTINInqData](o, "TAXTININQ", "/v1/payment/taxtin/inq", body, requestOption{})
+}
+
+// 8.13. Татварын төлбөрийн жагсаалт харах PIN
+func (o *openbank) TaxListByPIN(body model.TaxPINInqReq) ([]model.TaxPINInqData, error) {
+	return postEncrypted[[]model.TaxPINInqData](o, "TAXPININQ", "/v1/payment/taxpin/inq", body, requestOption{})
+}
+
+// 8.14. Татварын төлбөрийн нэхэмжлэх / цахим төлбөрийн даалгаврын дугаараар лавлагаа авах
+func (o *openbank) TaxInvoiceInq(body model.TaxInvoiceInqReq) (*model.TaxInvoiceInqResp, error) {
+	return postEncrypted[*model.TaxInvoiceInqResp](o, "TAXINVINQ", "/v1/payment/taxinv/inq", body, requestOption{})
+}
+
+// 8.15. Гаалийн төлбөрийн нэхэмжлэх / цахим төлбөрийн даалгаврын дугаараар лавлагаа авах
+func (o *openbank) CustomsInvoiceInq(body model.CustomsInvoiceInqReq) (*model.CustomsInvoiceInqResp, error) {
+	return postEncrypted[*model.CustomsInvoiceInqResp](o, "CGAINQ", "/v1/payment/cgainv/inq", body, requestOption{})
+}
+
+// 8.16. Файлаар хийсэн багц гүйлгээний дэлгэрэнгүй татах
+func (o *openbank) TransactionBatchFileInq(body model.TransactionBatchFileInqReq) (*model.TransactionBatchFileInqResp, error) {
+	return postEncrypted[*model.TransactionBatchFileInqResp](o, "CGWTTUMINQ", "/v1/transaction/cgw/ttum/inq", body, requestOption{})
 }

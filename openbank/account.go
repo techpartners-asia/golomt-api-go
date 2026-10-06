@@ -30,9 +30,9 @@ func (o *openbank) AccountBalcInq(body model.AccountBalcInqReq) (*model.AccountB
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		Post(o.url + "/v1/account/balance/inq")
 	if err != nil {
@@ -142,9 +142,9 @@ func (o *openbank) AccountDetail(body model.AccountDetailReq) (*model.AccountDet
 		}()).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		SetBody(bodyReader(body)).
 		Post(o.url + "/v1/account/operative/details")
@@ -184,9 +184,9 @@ func (o *openbank) AccountStatement(body model.StatementReq) (*model.StatementRe
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		Post(o.url + "/v1/account/operative/statement/")
 	if err != nil {
@@ -206,7 +206,12 @@ func (o *openbank) AccountStatement(body model.StatementReq) (*model.StatementRe
 	return parseEncryptedResponse[*model.StatementResp](response, o.DecryptAESCBC)
 }
 
-// 5.6.	Харилцах данс нээх
+// 5.6.	Харилцах дансны хуулга хуудаслалтай харах
+func (o *openbank) AccountStatementPage(body model.StatementPageReq) (*model.StatementPageResp, error) {
+	return postEncrypted[*model.StatementPageResp](o, "OPERACCSTAINQ", "/v1/account/operative/statement/inquiry", body, requestOption{})
+}
+
+// 5.7.	Харилцах данс нээх
 func (o *openbank) AccountAdd(body model.AccountAddReq) (*model.AccountAddResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -217,7 +222,7 @@ func (o *openbank) AccountAdd(body model.AccountAddReq) (*model.AccountAddResp, 
 	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
-		SetHeader("X-Golomt-Service", "OPEACCADD").
+		SetHeader("X-Golomt-Service", "OPERACCADD").
 		SetHeader("X-Golomt-Checksum", func() string {
 			checksum, err := o.bodyChecksum(body)
 			if err != nil {
@@ -227,9 +232,9 @@ func (o *openbank) AccountAdd(body model.AccountAddReq) (*model.AccountAddResp, 
 		}()).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		SetBody(bodyReader(body)).
 		Post(o.url + "/v1/account/operative/add")
@@ -247,7 +252,7 @@ func (o *openbank) AccountAdd(body model.AccountAddReq) (*model.AccountAddResp, 
 	return parseEncryptedResponse[*model.AccountAddResp](response, o.DecryptAESCBC)
 }
 
-// 5.7.	 Хадгаламжийн дансны дэлгэрэнгүй
+// 5.8.	Хадгаламжийн дансны дэлгэрэнгүй
 func (o *openbank) AccountDepositDetail(body model.AccountDetailReq) (*model.AccountDepositDetailResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -269,9 +274,9 @@ func (o *openbank) AccountDepositDetail(body model.AccountDetailReq) (*model.Acc
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		Post(o.url + "/v1/account/deposit/details")
 	if err != nil {
@@ -288,8 +293,8 @@ func (o *openbank) AccountDepositDetail(body model.AccountDetailReq) (*model.Acc
 	return parseEncryptedResponse[*model.AccountDepositDetailResp](response, o.DecryptAESCBC)
 }
 
-// 5.8.	Хадгаламжийн дансны хуулга харах
-// TODO: maybe response is not correct
+// 5.9.	Хадгаламжийн дансны хуулга харах
+// SPEC: хариу нь `account` талбартай гэж тодорхойлогдсон
 func (o *openbank) AccountDepositStatement(body model.StatementReq) (*model.AccountAddResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -311,9 +316,9 @@ func (o *openbank) AccountDepositStatement(body model.StatementReq) (*model.Acco
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		Post(o.url + "/v1/account/deposit/statement")
 	if err != nil {
@@ -330,7 +335,7 @@ func (o *openbank) AccountDepositStatement(body model.StatementReq) (*model.Acco
 	return parseEncryptedResponse[*model.AccountAddResp](response, o.DecryptAESCBC)
 }
 
-// 5.9.	Хадгаламжийн данс нээх
+// 5.10. Хадгаламжийн данс нээх
 func (o *openbank) AccountDepositAdd(body model.AccountDepositAddReq) (*model.AccountAddResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -351,6 +356,11 @@ func (o *openbank) AccountDepositAdd(body model.AccountDepositAddReq) (*model.Ac
 		}()).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
+		SetQueryParams(map[string]string{
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
+		}).
 		Post(o.url + "/v1/account/deposit/add")
 	if err != nil {
 		return nil, err
@@ -366,7 +376,7 @@ func (o *openbank) AccountDepositAdd(body model.AccountDepositAddReq) (*model.Ac
 	return parseEncryptedResponse[*model.AccountAddResp](response, o.DecryptAESCBC)
 }
 
-// 5.10. Дансны жагсаалт татах
+// 5.11. Дансны жагсаалт татах
 func (o *openbank) AccountList(body model.AccountListReq) (*model.AccountListResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -388,9 +398,9 @@ func (o *openbank) AccountList(body model.AccountListReq) (*model.AccountListRes
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		Post(o.url + "/v1/account/list")
 	if err != nil {
@@ -410,7 +420,7 @@ func (o *openbank) AccountList(body model.AccountListReq) (*model.AccountListRes
 	return parseEncryptedResponse[*model.AccountListResp](response, o.DecryptAESCBC)
 }
 
-// 5.11.a Данс эзэмшигчнийн мэдээллэл авах /Голомт/
+// 5.12.a Данс эзэмшигчнийн мэдээллэл авах /Голомт/
 func (o *openbank) AccountCustomerDetail(body model.AccountCustomerDetailReq) (*model.AccountCustomerDetailResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -431,12 +441,12 @@ func (o *openbank) AccountCustomerDetail(body model.AccountCustomerDetailReq) (*
 		}()).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		SetBody(bodyReader(body)).
-		Post(o.url + "/v1/account/customer/detail")
+		Post(o.url + "/v1/account/check/account")
 	if err != nil {
 		return nil, err
 	}
@@ -451,7 +461,7 @@ func (o *openbank) AccountCustomerDetail(body model.AccountCustomerDetailReq) (*
 	return parseEncryptedResponse[*model.AccountCustomerDetailResp](response, o.DecryptAESCBC)
 }
 
-// 5.11.b Данс эзэмшигчнийн мэдээллэл авах /Голомт бус/
+// 5.12.b Данс эзэмшигчнийн мэдээллэл авах /Голомт бус/
 func (o *openbank) AccountOtherBankCustomerDetail(body model.AccountCustomerDetailReq) (*model.AccountOtherBankCustomerDetailResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -470,14 +480,14 @@ func (o *openbank) AccountOtherBankCustomerDetail(body model.AccountCustomerDeta
 			}
 			return checksum
 		}()).
-		SetPathParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+		SetQueryParams(map[string]string{
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
-		Post(o.url + "/v1/account/customer/detail")
+		Post(o.url + "/v1/account/check/account")
 	if err != nil {
 		return nil, err
 	}

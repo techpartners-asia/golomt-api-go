@@ -1,12 +1,15 @@
 package model
 
+import "encoding/json"
+
 type (
 	TransactionReq struct {
 		// Харилцагчийн регистрийн дугаар
 		RegisterNumber string `json:"registerNumber" validate:"required"`
 		// Шилжүүлэг хийх банкны код.
 		// Лавлах төрөл: BANK
-		BankCode string `json:"bankCode"`
+		// 8.2 банк хоорондын гүйлгээнд заавал
+		BankCode string `json:"bankCode,omitempty"`
 		// Гүйгээний утга
 		Remarks string `json:"remarks" validate:"required"`
 		// Шилжүүлэгчийн мэдээлэл агуулсан объект
@@ -116,7 +119,7 @@ type (
 
 	TransactionBatchReq struct {
 		// Харилцагчийн регистрийн дугаар
-		RegisterNo string `json:"registerNo" validate:"required"`
+		RegisterNumber string `json:"registerNumber" validate:"required"`
 		// Багц гүйлгээний утга
 		Remarks string `json:"remarks" validate:"required"`
 		// гүйлгээний мэдээллийг агуулсан массив байна
@@ -131,7 +134,7 @@ type (
 
 	TransactionBatchCheckReq struct {
 		// Харилцагчийн регистрийн дугаар
-		RegisterNo string `json:"registerNo" validate:"required"`
+		RegisterNumber string `json:"registerNumber" validate:"required"`
 		// Багц гүйлгээний лавлах дугаар
 		RequestID string `json:"requestId" validate:"required"`
 	}
@@ -200,7 +203,6 @@ type (
 		Type string `json:"type"`
 	}
 
-	// TODO: check response
 	TransactionConfirmResp struct {
 		// Гүйлгээний дугаар
 		TransactionID string `json:"tranId"`
@@ -269,5 +271,215 @@ type (
 		ValueDate string `json:"value_date"`
 		// Гүйлгээ хийгдсэн огноо. Формат: DD/MM/YYYY
 		GlDate string `json:"gl_date"`
+	}
+
+	// 8.4. Гаалийн гүйлгээ хийх
+	CustomsPayReq struct {
+		// Харилцагчийн регистрийн дугаар
+		RegisterNumber string `json:"registerNumber" validate:"required"`
+		// “Нэхэмжлэх / Цахим төлбөрийн даалгавар”-ын дугаар
+		InvoiceNo string `json:"invoiceNo" validate:"required"`
+		// Шилжүүлэгчийн нэр
+		AccountName string `json:"acctName" validate:"required"`
+		// Шилжүүлэгчийн дансны дугаар
+		AccountNo string `json:"acctNo" validate:"required"`
+		// Гүйлгээний дүн агуулсан объект
+		Amount AmountDetail `json:"amount" validate:"required"`
+	}
+	CustomsPayResp struct {
+		// Шилжүүлгийн Id
+		Status string `json:"status"`
+		// Мессеж
+		Message string `json:"message"`
+	}
+
+	// 8.5. Татварын гүйлгээ хийх
+	TaxPayReq struct {
+		// Харилцагчийн регистрийн дугаар
+		RegisterNumber string `json:"registerNumber" validate:"required"`
+		// Гүйлгээний утга
+		Remarks string `json:"remarks" validate:"required"`
+		// “Нэхэмжлэх / Цахим төлбөрийн даалгавар”-ын дугаар
+		InvoiceNo string `json:"invoiceNo" validate:"required"`
+		// Татварын төрлийн код
+		TaxTypeCode string `json:"taxTypeCode" validate:"required"`
+		// Шилжүүлэгчийн мэдээлэл агуулсан объект
+		Initiator TransactionObject `json:"initiator" validate:"required"`
+	}
+	TaxPayResp struct {
+		// Шилжүүлгийн Id
+		TransactionID string `json:"tranId"`
+		// Шилжүүлсэн огноо
+		TransactionDate string `json:"tranDate"`
+		// Шилжүүлгийн статус
+		TransactionStatus string `json:"tranStatus"`
+	}
+
+	// Нэхэмжлэхийн хөрөнгийн дэлгэрэнгүй
+	TaxAsset struct {
+		// Хөрөнгийн төрөл. 1=Галт зэвсэг, 2=Үл хөдлөх эд хөрөнгө, 3=Эд хөрөнгө,
+		// 4=Мал, амьтан, 5=Тээврийн хэрэгсэл, 6=Эдийн бус хөрөнгө
+		ObjType json.Number `json:"objType"`
+		// Галт зэвсгийн замагны дугаар
+		LockNo string `json:"lockNo"`
+		// Галт зэвсгийн гол төмрийн дугаар
+		BarrelNo string `json:"barrelNo"`
+		// Тээврийн хэрэгслийн улсын бүртгэлийн дугаар
+		RegNumber string `json:"regNumber"`
+		// Тээврийн хэрэгслийн арлын дугаар
+		ChassisNo string `json:"chassisNo"`
+		// Тээврийн хэрэгслийн загвар
+		Model string `json:"model"`
+		// Тээврийн хэрэгслийн марк
+		Mark string `json:"mark"`
+		// Үл хөдлөх эд хөрөнгийн улсын бүртгэлийн гэрчилгээний дугаар
+		CertificateNo string `json:"certificateNo"`
+	}
+
+	// 8.12. Татварын төлбөрийн жагсаалт харах TIN
+	TaxTINInqReq struct {
+		// Татвар төлөгч бүрт олгогдсон дугаар
+		TIN string `json:"tin" validate:"required"`
+	}
+	TaxTINInqData struct {
+		// “Нэхэмжлэх / Цахим төлбөрийн даалгавар”-ын дугаар
+		InvoiceNo string `json:"invoiceNo"`
+		// Татварын төрлийн код
+		TaxTypeCode string `json:"taxTypeCode"`
+		// Нэхэмжлэхийн үлдэгдэл дүн
+		Amount float64 `json:"amount"`
+		// Нэхэмжлэхийн дэлгэрэнгүй
+		Asset *TaxAsset `json:"asset"`
+	}
+
+	// 8.13. Татварын төлбөрийн жагсаалт харах PIN
+	TaxPINInqReq struct {
+		// УБЕГ-аас олгосон иргэний регистрийн дугаар болон хуулийн этгээдийн 7 оронтой улсын бүртгэлийн дугаар
+		PIN string `json:"pin" validate:"required"`
+	}
+	TaxPINInqData struct {
+		// Татвар төлөгчийн дугаар
+		TIN string `json:"tin"`
+		// Татвар төлөгчийн нэр
+		Name string `json:"name"`
+	}
+
+	// 8.14. Татварын нэхэмжлэхийн лавлагаа
+	TaxInvoiceInqReq struct {
+		// “Нэхэмжлэх / Цахим төлбөрийн даалгавар”-ын дугаар
+		InvoiceNo string `json:"invoiceNo" validate:"required"`
+	}
+	TaxInvoiceInqResp struct {
+		// “Нэхэмжлэх / Цахим төлбөрийн даалгавар”-ын дугаар
+		InvoiceNo string `json:"invoiceNo"`
+		// Төлбөрийн дүн
+		Amount float64 `json:"amount"`
+		// Регистрийн дугаар
+		PIN string `json:"pin"`
+		// Татвар төлөгчийн дугаар
+		TIN string `json:"tin"`
+		// Татвар төлөгчийн нэр
+		TaxPayerName string `json:"taxPayerName"`
+		// Тайлбар
+		Description string `json:"description"`
+		// Төрийн сан дахь татварын орлогын дансны дугаар
+		StateAccount string `json:"stateAccount"`
+		// Төрийн сан дахь татварын орлогын дансны нэр
+		StateAccountName string `json:"stateAccountName"`
+		// IBAN дансны дугаар
+		IBAN string `json:"iban"`
+		// 1=Нэхэмжлэх, 2=Төлбөрийн даалгавар, 3=Урьдчилгаа төлбөрийн нэхэмжлэх
+		InvoiceType json.Number `json:"invoiceType"`
+		// Татварын төрлийн код
+		TaxTypeCode string `json:"taxTypeCode"`
+		// Татварын төрлийн нэр
+		TaxTypeName string `json:"taxTypeName"`
+		// Татварын албаны код
+		BranchCode string `json:"branchCode"`
+		// Татварын албаны нэр
+		BranchName string `json:"branchName"`
+		// Татварын дэд албаны код
+		SubBranchCode string `json:"subBranchCode"`
+		// Татварын дэд албаны нэр
+		SubBranchName string `json:"subBranchName"`
+		// Тайлант жил
+		Year json.Number `json:"year"`
+		// Тайлант үечлэл
+		PeriodType string `json:"periodType"`
+		// Тайлангийн хугацаа
+		Period json.Number `json:"period"`
+		// 1=Бүтэн төлнө, 0=Дутуу төлж болно
+		PayFull json.Number `json:"payFull"`
+		// Илүү төлж болох эсэх
+		PayMore json.Number `json:"payMore"`
+		// Нэхэмжлэхийн дэлгэрэнгүй
+		Asset *TaxAsset `json:"asset"`
+		// Шилжүүлгийн статус
+		PayStatus string `json:"payStatus"`
+	}
+
+	// 8.15. Гаалийн нэхэмжлэхийн лавлагаа
+	CustomsInvoiceInqReq struct {
+		// “Нэхэмжлэх / Цахим төлбөрийн даалгавар”-ын дугаар
+		Invoice string `json:"invoice,omitempty"`
+		// Улсын бүртгэлийн дугаар
+		Register string `json:"register,omitempty"`
+		// “Нэхэмжлэх / Цахим төлбөрийн даалгавар”-ын дугаар
+		Barcode string `json:"barcode,omitempty"`
+	}
+	CustomsInvoiceInqResp struct {
+		// “Нэхэмжлэх / Цахим төлбөрийн даалгавар”-ын дугаар
+		InvoiceNo string `json:"invoiceNo"`
+		// Салбарын дугаар
+		BranchID string `json:"branchId"`
+		// Салбарын нэр
+		BranchName string `json:"branchName"`
+		DecDate    string `json:"decDate"`
+		// Регистрийн дугаар
+		NatID    string  `json:"natId"`
+		PymtCode string  `json:"pymtCode"`
+		PymtAmt  float64 `json:"pymtAmt"`
+		// Гүйлгээний мөнгөн дүн
+		TotPymtAmt float64 `json:"totPymtAmt"`
+		// Дансны дугаар
+		CrAcct string `json:"crAcct"`
+		// Дансны нэр
+		CrAcctName string `json:"crAcctName"`
+		// Нэхэмжлэлийн код
+		InvoiceCode string `json:"invoiceCode"`
+		// Татвар төлөгчийн нэр
+		TaxpayerName string `json:"taxpayerName"`
+	}
+
+	// 8.16. Файлаар хийсэн багц гүйлгээний дэлгэрэнгүй татах
+	TransactionBatchFileInqReq struct {
+		// Харилцагчийн регистрийн дугаар
+		RegisterNumber string `json:"registerNumber" validate:"required"`
+		// Багц гүйлгээний зориулалт. SAL, PKG
+		FileCode string `json:"fileCode" validate:"required"`
+		// Багц гүйлгээний лавлах дугаар
+		ReferenceNumber string `json:"referenceNumber" validate:"required"`
+	}
+	TransactionBatchFileInqResp struct {
+		// Хүсэлтийн лавлах дугаар
+		RequestID string `json:"requestId"`
+		// Файлын зориулалт
+		FileCode string `json:"fileCode"`
+		// Файлын нэр
+		FileName string `json:"fileName"`
+		// Файлын төрөл
+		FileType string `json:"fileType"`
+		// Гүйлгээний дугаар. Бүх гүйлгээ нэг л гүйлгээний дугаартай гарна
+		TransactionID string `json:"tranId"`
+		// Гүйлгээний төлөв
+		Status string `json:"status"`
+		// Утга
+		Remarks string `json:"remarks"`
+		// Амжилтгүй болсон шалтгаан
+		Reason string `json:"reason"`
+		// Гүйлгээний огноо. YYYY-MM-DD
+		ValueDate string `json:"valueDate"`
+		// Бүртгэсэн огноо. yyyy-MM-ddThh:mm:ss
+		CreDate string `json:"creDate"`
 	}
 )

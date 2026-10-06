@@ -47,60 +47,97 @@ type Openbank interface {
 	AccountDetail(body model.AccountDetailReq) (*model.AccountDetailResp, error)
 	// 5.5.	Харилцах дансны хуулга харах
 	AccountStatement(body model.StatementReq) (*model.StatementResp, error)
-	// 5.6.	Харилцах данс нээх
+	// 5.6.	Харилцах дансны хуулга хуудаслалтай харах
+	AccountStatementPage(body model.StatementPageReq) (*model.StatementPageResp, error)
+	// 5.7.	Харилцах данс нээх
 	AccountAdd(body model.AccountAddReq) (*model.AccountAddResp, error)
-	// 5.7.	 Хадгаламжийн дансны дэлгэрэнгүй
+	// 5.8.	Хадгаламжийн дансны дэлгэрэнгүй
 	AccountDepositDetail(body model.AccountDetailReq) (*model.AccountDepositDetailResp, error)
-	// 5.8.	Хадгаламжийн дансны хуулга харах
-	// TODO: maybe response is not correct
+	// 5.9.	Хадгаламжийн дансны хуулга харах
 	AccountDepositStatement(body model.StatementReq) (*model.AccountAddResp, error)
-	// 5.9.	Хадгаламжийн данс нээх
+	// 5.10. Хадгаламжийн данс нээх
 	AccountDepositAdd(body model.AccountDepositAddReq) (*model.AccountAddResp, error)
-
-	// 5.10. Дансны жагсаалт татах
+	// 5.11. Дансны жагсаалт татах
 	AccountList(body model.AccountListReq) (*model.AccountListResp, error)
-	// 5.11.a Данс эзэмшигчнийн мэдээллэл авах /Голомт/
+	// 5.12.a Данс эзэмшигчнийн мэдээллэл авах /Голомт/
 	AccountCustomerDetail(body model.AccountCustomerDetailReq) (*model.AccountCustomerDetailResp, error)
-	// 5.11.b Данс эзэмшигчнийн мэдээллэл авах /Голомт бус/
+	// 5.12.b Данс эзэмшигчнийн мэдээллэл авах /Голомт бус/
 	AccountOtherBankCustomerDetail(body model.AccountCustomerDetailReq) (*model.AccountOtherBankCustomerDetailResp, error)
 
-	// 6.1.	Голомт Банк хоорондын гүйлгээ
+	// 8.1.	Голомт Банк хоорондын гүйлгээ
 	TransactionInBank(body model.TransactionReq) (*model.TransactionResp, error)
-	// 6.2.	 Бусад банк хоорондын гүйлгээ
+	// 8.2.	Бусад банк хоорондын гүйлгээ
 	TransactionOtherBank(body model.TransactionReq) (*model.TransactionResp, error)
-	// 6.3. Байгууллага өөрийн дансаас гүйлгээ хийх
+	// 8.3.	Байгууллага өөрийн дансаас гүйлгээ хийх
 	TransactionSelf(body model.TransactionSelfReq) (*model.TransactionSelfResp, error)
-	// 6.8. Гүйлгээний төлөв шалгах
+	// 8.4.	Гаалийн гүйлгээ хийх
+	TransactionCustomsPay(body model.CustomsPayReq) (*model.CustomsPayResp, error)
+	// 8.5.	Татварын гүйлгээ хийх
+	TransactionTaxPay(body model.TaxPayReq) (*model.TaxPayResp, error)
+	// 8.6.	Гүйлгээ буцаах
+	TransactionRefund(body model.TransactionRefundReq) (*model.TransactionRefundResp, error)
+	// 8.7.	Гүйлгээ шалгах
+	TransactionCheck(body model.TransactionCheckReq) (*model.TransactionCheckResp, error)
+	// 8.8.	Багц гүйлгээ хийх
+	TransactionBatch(body model.TransactionBatchReq) (*model.TransactionBatchResp, error)
+	// 8.9.	Багц гүйлгээний төлөв шалгах
+	TransactionBatchCheck(body model.TransactionBatchCheckReq, page model.PageReq) (*model.TransactionBatchCheckResp, error)
+	// 8.10. Гүйлгээний төлөв шалгах
 	TransactionConfirm(body model.TransactionConfirmReq) (*model.TransactionConfirmResp, error)
-	// 7.1.	Хот, аймагийн жагсаалт авах
-	StateListInq(body model.StateListReq) ([]model.StateListResp, error)
-	// 7.2.	Сум, дүүргийн жагсаалт авах
-	DistrictListInq(body model.DistrictListReq) ([]model.DistrictListResp, error)
-	// 7.3.	Категори төрлөөр сонголтын жагсаалт авах
-	CategoryListInq(body model.CategoryReq) (*model.CategoryResp, error)
-	// 7.4.	Ханшны мэдээлэл авах
-	RateInq(body model.RateReq) (*model.RateResp, error)
-	// 7.5.	Салбарын жагсаалт авах
-	BranchListInq(body model.BranchListReq) ([]model.BranchListResp, error)
-	// 7.6.	Бүтээгдэхүүн лавлах
-	ProductListInq(body model.ProductListReq) ([]model.ProductData, error)
+	// 8.11. Багц гүйлгээ файлаар хийх
+	TransactionBatchFile(input model.TransactionBatchFileInput) (*model.TransactionBatchFileResp, error)
+	// 8.12. Татварын төлбөрийн жагсаалт харах TIN
+	TaxListByTIN(body model.TaxTINInqReq) ([]model.TaxTINInqData, error)
+	// 8.13. Татварын төлбөрийн жагсаалт харах PIN
+	TaxListByPIN(body model.TaxPINInqReq) ([]model.TaxPINInqData, error)
+	// 8.14. Татварын төлбөрийн нэхэмжлэхийн дугаараар лавлагаа авах
+	TaxInvoiceInq(body model.TaxInvoiceInqReq) (*model.TaxInvoiceInqResp, error)
+	// 8.15. Гаалийн төлбөрийн нэхэмжлэхийн дугаараар лавлагаа авах
+	CustomsInvoiceInq(body model.CustomsInvoiceInqReq) (*model.CustomsInvoiceInqResp, error)
+	// 8.16. Файлаар хийсэн багц гүйлгээний дэлгэрэнгүй татах
+	TransactionBatchFileInq(body model.TransactionBatchFileInqReq) (*model.TransactionBatchFileInqResp, error)
 
-	// 8.1.	Картын токен авах
-	CardTokenize(body model.TokenizeReq) (string, error)
-	// 8.2.	Картын токеныг хаах
-	CardTokenClose(body model.TokenCloseReq) (*model.TokenCloseResp, error)
-	// 8.3.	Картын гүйлгээ хийх
-	CardPurchase(body model.CardPurchaseReq) (*model.CardPurchaseResp, error)
-	// 8.4.	Картын гүйлгээний дүн шалгах
-	CardPurchaseCheck(body model.CardPurchaseCheckReq) (*model.CardPurchaseCheckResp, error)
-	// 8.5.	Картын хуулга харах
-	CardMerchantStatement(body model.CardMerchantStatementReq, page model.PageReq) (*model.CardMerchantStatementResp, error)
-	// 8.6.	Кредит картын дэлгэрэнгүй
+	// 9.1.	Кредит картын дэлгэрэнгүй
 	CardCreditDetail(body model.CardCreditDetailReq) (*model.CardCreditDetailResp, error)
-	// 8.7.	Картын гүйлгээний мэдээлэл татах
+	// 9.2.	Картын жагсаалт (Дебит, Кредит)
+	CardList(body model.CardListReq) ([]model.CardListData, error)
+	// 9.9.	Картын гүйлгээний мэдээлэл татах
 	CardTransaction(body model.CardTransactionReq) (*model.CardTransactionResp, error)
-	// 8.8.	Кредит карт хуулга харах
+	// 9.11. Кредит карт хуулга харах
 	CardCreditStatement(body model.CardCreditStatementReq) ([]model.CardCreditStatementData, error)
+	// 9.15. Токентэй картнаас гүйлгээ гаргах
+	CardPurchase(body model.CardPurchaseReq) (*model.CardPurchaseResp, error)
+	// 9.23. Мерчантын хуулга авах
+	CardMerchantStatement(body model.CardMerchantStatementReq, page model.PageReq) (*model.CardMerchantStatementResp, error)
+	// 9.32. Картын гүйлгээ шалгах
+	CardPurchaseCheck(body model.CardPurchaseCheckReq) (*model.CardPurchaseCheckResp, error)
+	// 9.33. Байгууллагын виртуал кредит карт токенжуулах
+	CardTokenize(body model.TokenizeReq) (string, error)
+	// 9.34. Токен цуцлах
+	CardTokenClose(body model.TokenCloseReq) (*model.TokenCloseResp, error)
+	// 9.35. UnionPay QR үүсгэх
+	UnionPayQRGenerate(body model.UnionPayQRReq) (*model.UnionPayQRResp, error)
+	// 9.36. UnionPay токен үүсгэх
+	UnionPayTokenCreate(body model.UnionPayTokenCreateReq) (*model.UnionPayTokenCreateResp, error)
+	// 9.37. UnionPay токен өөрчлөх
+	UnionPayTokenUpdate(body model.UnionPayTokenUpdateReq) (*model.UnionPayTokenUpdateResp, error)
+
+	// 10.1. Хот, аймагийн жагсаалт авах
+	StateListInq(body model.StateListReq) ([]model.StateListResp, error)
+	// 10.2. Сум, дүүргийн жагсаалт авах
+	DistrictListInq(body model.DistrictListReq) ([]model.DistrictListResp, error)
+	// 10.3. Категори төрлөөр сонголтын жагсаалт авах
+	CategoryListInq(body model.CategoryReq) (*model.CategoryResp, error)
+	// 10.4. Ханшны мэдээлэл авах
+	RateInq(body model.RateReq) (*model.RateResp, error)
+	// 10.5. Салбарын жагсаалт авах
+	BranchListInq(body model.BranchListReq) ([]model.BranchListResp, error)
+	// 10.6. Бүтээгдэхүүн лавлах
+	ProductListInq(body model.ProductListReq) ([]model.ProductData, error)
+	// 10.7. RateCode лавлах
+	RateCodeInq(body model.RateCodeReq) (*model.RateCodeResp, error)
+	// 10.8. Exchange Rate лавлах
+	ExchangeRateInq(body model.ExchangeRateReq) (*model.ExchangeRateResp, error)
 }
 
 func New(input model.OpenbankInput) Openbank {

@@ -1,15 +1,13 @@
 package model
 
+import "encoding/json"
+
 type (
 	TokenizeReq struct {
 		// Карт эзэмшигч иргэний РД
 		CivilRegisterNo string `json:"civilRegisterNo" validate:"required"`
 		// Байгууллагын РД
 		CorporateRegisterNo string `json:"corpRegisterNo" validate:"required"`
-		// Дахин давтагдашгүй дугаар бөгөөд тус хүсэлтийг илтгэнэ.
-		State string `json:"state"`
-		// Тус хүсэлтийг encrypt хийсэн утга
-		Scope string `json:"scope"`
 	}
 	TokenizeResp struct {
 		// Статус
@@ -122,26 +120,26 @@ type (
 		CardToken string `json:"cardToken" validate:"required"`
 	}
 	CardCreditDetailResp struct {
-		// Картын дугаар
+		// Картын дугаар /маскласан/
 		CardNumber string `json:"cardNumber"`
 		// Картын нэр
 		EmbossName string `json:"embossName"`
 		// Картын төлөв
 		Status string `json:"status"`
-		// Картын дуусах огноо
-		ExpireDate string `json:"expireDate"`
+		// Картын дуусах хугацаа (yyyyMM)
+		ExpiryDate string `json:"expiryDate"`
 		// Картын пластикийн тайлбар
 		ProductGroupDescription string `json:"productGroupDescription"`
 		// Сүүлд төлбөр төлсөн огноо
 		LastDueDate string `json:"lastDueDate"`
 		// Сүүлд төлсөн мөнгөн дүн
-		LastDueAmount string `json:"lastDueAmount"`
+		LastDueAmount json.Number `json:"lastDueAmount"`
 		// Төлөлт хийх боломжтой бага дүн
-		MinimumPaymentDueAmount string `json:"minimumPaymentDueAmount"`
+		MinimumPaymentDueAmount json.Number `json:"minimumPaymentDueAmount"`
 		// Картын боломжит үлдэгдэл
-		AccountAvailableLimit string `json:"accountAvailableLimit"`
+		AccountAvailableLimit json.Number `json:"accountAvailableLimit"`
 		// Картын зарцуулалт
-		AccountOutstandingBalance string `json:"accountOutstandingBalance"`
+		AccountOutstandingBalance json.Number `json:"accountOutstandingBalance"`
 	}
 
 	CardTransactionReq struct {
@@ -195,5 +193,105 @@ type (
 		CurrentBalance float64         `json:"currBal"`
 		Month          int             `json:"month"`
 		Statements     []CardStatement `json:"statements"`
+	}
+
+	CardListReq struct {
+		// Харилцагчийн регистрийн дугаар
+		RegisterNo string `json:"registerNo" validate:"required"`
+	}
+	CardListData struct {
+		// Картын токен. Бусад хүсэлт дээр энэхүү токенийг ашиглана
+		CardToken string `json:"cardToken"`
+		// Картын дугаар /маскласан/
+		CardNumber string `json:"cardNumber"`
+		// Картын пластикийн төрөл
+		Brand string `json:"brand"`
+		// Картын төрөл. DEBIT, CREDIT
+		Type string `json:"type"`
+	}
+
+	UnionPayQRReq struct {
+		// Wallet id
+		WalletID string `json:"walletId" validate:"required"`
+		// Төхөөрөмжийн Id
+		DeviceID string `json:"deviceID" validate:"required"`
+		// Токен
+		Token string `json:"token" validate:"required"`
+	}
+	UnionPayQRResp struct {
+		// Бар код
+		BarcodeCpqrcPayload string `json:"barcodeCpqrcPayload"`
+		// QR код
+		EmvCpqrcPayload string `json:"emvCpqrcPayload"`
+		// Хариу код. "00" амжилттай
+		ResponseCode string `json:"responseCode"`
+		// Хариу мессеж
+		ResponseMsg string `json:"responseMsg"`
+	}
+
+	UnionPayTokenCreateReq struct {
+		// Wallet id
+		WalletID string `json:"walletId" validate:"required"`
+		// Төхөөрөмжийн Id
+		DeviceID string `json:"deviceID" validate:"required"`
+		// Голомт банкны картын токен
+		Token string `json:"token" validate:"required"`
+		// Утасны дугаар
+		MobileNumber string `json:"mobileNumber" validate:"required"`
+	}
+	UnionPayTokenCreateResp struct {
+		// Тодорхойлолт
+		Par string `json:"par"`
+		// UPI токен нууцалсан талбар
+		MaskedToken string `json:"maskedToken"`
+		// Картын дугаар
+		MaskedPan string `json:"maskedPan"`
+		// UPI токены хугацаа
+		TokenExpiry string `json:"tokenExpiry"`
+		// UPI токены статус
+		TokenState string `json:"tokenState"`
+		// Төхөөрөмжийн Id
+		DeviceID string `json:"deviceId"`
+		// UPI токен нууцлалтгүй талбар
+		Token string `json:"token"`
+		// Хариу код. "00" амжилттай
+		ResponseCode string `json:"responseCode"`
+		// Хариу мессеж. "Approved"
+		ResponseMsg    string `json:"responseMsg"`
+		Signature      string `json:"signature"`
+		UmpsSignCertID string `json:"umpsSignCertId"`
+		// Хүсэлтийн төрөл
+		MsgType string `json:"msgType"`
+	}
+
+	UnionPayTokenUpdateReq struct {
+		// Wallet id
+		WalletID string `json:"walletId" validate:"required"`
+		// Төхөөрөмжийн Id
+		DeviceID string `json:"deviceID" validate:"required"`
+		// UPI токен
+		UpiToken string `json:"upiToken" validate:"required"`
+		// UPI токены статус. Жишээ: ACTIVE
+		TokenAction string `json:"tokenAction,omitempty"`
+		// Утасны дугаар
+		MobileNumber string `json:"mobileNumber" validate:"required"`
+		// Голомт банкны картын токен
+		CardToken string `json:"cardToken" validate:"required"`
+	}
+	UnionPayTokenUpdateResp struct {
+		// UPI токены статус
+		TokenState string `json:"tokenState"`
+		// Төхөөрөмжийн Id
+		DeviceID string `json:"deviceId"`
+		// Хариу код. "00" амжилттай
+		ResponseCode string `json:"responseCode"`
+		// Хариу мессеж
+		ResponseMsg string `json:"responseMsg"`
+		// UPI токен
+		Token          string `json:"token"`
+		Signature      string `json:"signature"`
+		UmpsSignCertID string `json:"umpsSignCertId"`
+		// Хүсэлтийн төрөл
+		MsgType string `json:"msgType"`
 	}
 )

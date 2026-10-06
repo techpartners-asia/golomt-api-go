@@ -8,7 +8,7 @@ import (
 	"resty.dev/v3"
 )
 
-// 7.1.	Хот, аймагийн жагсаалт авах
+// 10.1.	Хот, аймагийн жагсаалт авах
 func (o *openbank) StateListInq(body model.StateListReq) ([]model.StateListResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -43,11 +43,10 @@ func (o *openbank) StateListInq(body model.StateListReq) ([]model.StateListResp,
 		}
 		return nil, fmt.Errorf("%s-Golomt CG utility area list inq response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	fmt.Println(response)
 	return parseResponse[[]model.StateListResp](response)
 }
 
-// 7.2.	Сум, дүүргийн жагсаалт авах
+// 10.2.	Сум, дүүргийн жагсаалт авах
 func (o *openbank) DistrictListInq(body model.DistrictListReq) ([]model.DistrictListResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -85,7 +84,7 @@ func (o *openbank) DistrictListInq(body model.DistrictListReq) ([]model.District
 	return parseResponse[[]model.DistrictListResp](response)
 }
 
-// 7.3.	Категори төрлөөр сонголтын жагсаалт авах
+// 10.3.	Категори төрлөөр сонголтын жагсаалт авах
 func (o *openbank) CategoryListInq(body model.CategoryReq) (*model.CategoryResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -123,7 +122,7 @@ func (o *openbank) CategoryListInq(body model.CategoryReq) (*model.CategoryResp,
 	return parseResponse[*model.CategoryResp](response)
 }
 
-// 7.4.	Ханшны мэдээлэл авах
+// 10.4.	Ханшны мэдээлэл авах
 func (o *openbank) RateInq(body model.RateReq) (*model.RateResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -162,7 +161,7 @@ func (o *openbank) RateInq(body model.RateReq) (*model.RateResp, error) {
 	return parseResponse[*model.RateResp](response)
 }
 
-// 7.5.	Салбарын жагсаалт авах
+// 10.5.	Салбарын жагсаалт авах
 func (o *openbank) BranchListInq(body model.BranchListReq) ([]model.BranchListResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -200,7 +199,7 @@ func (o *openbank) BranchListInq(body model.BranchListReq) ([]model.BranchListRe
 	return parseResponse[[]model.BranchListResp](response)
 }
 
-// 7.6.	Бүтээгдэхүүн лавлах
+// 10.6.	Бүтээгдэхүүн лавлах
 func (o *openbank) ProductListInq(body model.ProductListReq) ([]model.ProductData, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
@@ -236,4 +235,15 @@ func (o *openbank) ProductListInq(body model.ProductListReq) ([]model.ProductDat
 		return nil, fmt.Errorf("%s-Golomt CG utility product list inq response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
 	return parseResponse[[]model.ProductData](response)
+}
+
+// 10.7. RateCode лавлах
+func (o *openbank) RateCodeInq(body model.RateCodeReq) (*model.RateCodeResp, error) {
+	return postPlain[*model.RateCodeResp](o, "RATECODEINQ", "/v1/utility/rate/code/inq", body)
+}
+
+// 10.8. Exchange Rate лавлах
+func (o *openbank) ExchangeRateInq(body model.ExchangeRateReq) (*model.ExchangeRateResp, error) {
+	// SPEC 1.5.8 дээр X-Golomt-Service нь 10.7-той ижил RATECODEINQ гэж заасан
+	return postPlain[*model.ExchangeRateResp](o, "RATECODEINQ", "/v1/utility/exchange/rate/inq", body)
 }

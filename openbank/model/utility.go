@@ -1,5 +1,7 @@
 package model
 
+import "encoding/json"
+
 type (
 	StateListReq struct {
 		// Хот, аймагийн код: ALL
@@ -9,9 +11,9 @@ type (
 		// Хүсэлтийн дугаар
 		RequestID string `json:"requestId"`
 		// Хот, аймагийн код
-		Code string `json:"code"`
+		StateCode string `json:"stateCode"`
 		// Хот, аймагийн нэр
-		Name string `json:"name"`
+		StateName string `json:"stateName"`
 	}
 	DistrictListReq struct {
 		// STATEINQ хариу мэдэгдэл дээр ирсэн код байна
@@ -21,9 +23,9 @@ type (
 		// Хүсэлтийн дугаар
 		RequestID string `json:"requestId"`
 		// Сум, дүүргийн код
-		Code string `json:"code"`
+		CityCode string `json:"cityCode"`
 		// Сум, дүүргийн нэр
-		Name string `json:"name"`
+		CityName string `json:"cityName"`
 	}
 	CategoryReq struct {
 		// Лавлах төрөл: SECTOR_CODE
@@ -68,7 +70,7 @@ type (
 		// B-both
 		CustormerType string `json:"custType"`
 		//Бүтээгдэхүүн үүсгэх доод үлдэгдэл
-		Minbalances []MinBalanceData `json:"minbalances"`
+		Minbalances []MinBalanceData `json:"minBalances"`
 		// Бүтээгдэхүүн үүсгэх нөхцөл
 		Interests []InterestData `json:"interests"`
 	}
@@ -109,12 +111,48 @@ type (
 		// Валют нэр
 		CurrencyName string `json:"currencyName"`
 		// Бэлэн ханш авах
-		CashValueSell string `json:"cashValueSell"`
+		CashValueSell json.Number `json:"cashValueSell"`
 		// Бэлэн ханш зарах
-		CashValueBuy string `json:"cashValueBuy"`
+		CashValueBuy json.Number `json:"cashValueBuy"`
 		// Бэлэн бус ханш авах
-		NonCashValueSell string `json:"nonCashValueSell"`
+		NonCashValueSell json.Number `json:"nonCashValueSell"`
 		// Бэлэн бус ханш зарах
-		NonCashValueBuy string `json:"nonCashValueBuy"`
+		NonCashValueBuy json.Number `json:"nonCashValueBuy"`
+	}
+
+	// 10.7. RateCode лавлах
+	RateCodeReq struct {
+		// Жишээ: EUR
+		RefCurrency string `json:"refCurrency" validate:"required"`
+		// Жишээ: USD
+		AccCurrency string `json:"accCurrency" validate:"required"`
+	}
+	RateCodeResp struct {
+		RequestID string `json:"requestId"`
+		// CNN6S / CNN6B (BUY/SELL)
+		RateCode string `json:"rateCode"`
+	}
+
+	// 10.8. Exchange Rate лавлах
+	ExchangeRateReq struct {
+		// Хөрвүүлэх валют
+		FromCurrency string `json:"fromCurrency" validate:"required"`
+		// Хөрвөсөн валют
+		ToCurrency string `json:"toCurrency"`
+		// CNN6S / CNN6B (BUY/SELL)
+		RateCode string `json:"rateCode"`
+	}
+	ExchangeRateResp struct {
+		// Хүсэлтийн дугаар
+		RequestID string `json:"requestId"`
+		// Хөрвүүлэх валют
+		FixedCurrCode string `json:"fixedCurrCode"`
+		// Тоо ширхэг
+		FixedCurrUnits float64 `json:"fixedCurrUnits"`
+		IsRateLatest   string  `json:"isRateLatest"`
+		// Хөрвөсөн валют
+		VarCurrCode string `json:"varCurrCode"`
+		// Тооцоолол
+		VarCurrUnits float64 `json:"varCurrUnits"`
 	}
 )

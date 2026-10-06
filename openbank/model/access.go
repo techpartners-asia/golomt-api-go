@@ -17,8 +17,10 @@ type (
 		// Харилцагчийн регистрийн дугаар
 		RegisterNo string `json:"registerNo" validate:"required"`
 		// Сервисүүдийн жагсаалтыг агуулсан массив байна
-		Services []string `json:"services" validate:"required"`
-		// Тухайн нэг сервисийн X-Golomt-Service дугаар байна.
+		Services []ServiceItem `json:"services" validate:"required"`
+	}
+	ServiceItem struct {
+		// Тухайн нэг сервисийн X-Golomt-Service дугаар байна. Жишээ: ACCTBALINQ
 		Code string `json:"code" validate:"required"`
 	}
 

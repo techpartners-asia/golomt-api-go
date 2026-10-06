@@ -6,7 +6,6 @@ import (
 	"crypto/sha1"
 	"encoding/base32"
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -117,7 +116,6 @@ func decodeBase32(secret string) ([]byte, error) {
 	decoder := base32.StdEncoding.WithPadding(base32.NoPadding)
 	key, err := decoder.DecodeString(secret)
 	if err != nil {
-		fmt.Println("invalid base32 secret", err)
 		return nil, errors.New("invalid base32 secret")
 	}
 	return key, nil

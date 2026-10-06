@@ -104,18 +104,18 @@ func (o *openbank) ServicesAccess(body model.ServiceListReq) (*model.ServiceList
 			return checksum
 		}()).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
-		SetBody(body).
-		SetResult(&response).
+		SetBody(bodyReader(body)).
 		Post(o.url + "/v1/auth/services/access")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
-		return nil, fmt.Errorf("%s-Golomt CG statement response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
+		return nil, fmt.Errorf("%s-Golomt CG auth response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
 	return parseEncryptedResponse[*model.ServiceListResp](response, o.DecryptAESCBC)
 }
@@ -141,21 +141,21 @@ func (o *openbank) GetPhone() (*model.GetPhoneResp, error) {
 		}()).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
-		SetResult(&response).
 		Get(o.url + "/v1/auth/authorize/getphone")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
-		return nil, fmt.Errorf("%s-Golomt CG statement response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
+		return nil, fmt.Errorf("%s-Golomt CG auth response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
 	return parseEncryptedResponse[*model.GetPhoneResp](response, o.DecryptAESCBC)
 }
@@ -181,24 +181,28 @@ func (o *openbank) OTPSend(phone string) (*model.OTPSendResp, error) {
 		}()).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
-		SetQueryParams(map[string]string{
-			"phone": phone,
-		}).
-		SetResult(&response).
+		SetQueryParams(func() map[string]string {
+			// Манай хэрэглэгч биш тохиолдолд phone параметрээр дугаар явуулна
+			if phone == "" {
+				return nil
+			}
+			return map[string]string{"phone": phone}
+		}()).
 		Get(o.url + "/v1/auth/authorize/otpsend")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
-		return nil, fmt.Errorf("%s-Golomt CG statement response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
+		return nil, fmt.Errorf("%s-Golomt CG auth response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
 	return parseEncryptedResponse[*model.OTPSendResp](response, o.DecryptAESCBC)
 }
@@ -223,18 +227,18 @@ func (o *openbank) OTPVerify(body model.OTPVerifyReq) (*model.OTPVerifyResp, err
 			return checksum
 		}()).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
-		SetBody(body).
-		SetResult(&response).
+		SetBody(bodyReader(body)).
 		Post(o.url + "/v1/auth/authorize/otp")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
-		return nil, fmt.Errorf("%s-Golomt CG statement response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
+		return nil, fmt.Errorf("%s-Golomt CG auth response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
 	return parseEncryptedResponse[*model.OTPVerifyResp](response, o.DecryptAESCBC)
 }
@@ -260,21 +264,21 @@ func (o *openbank) XypOTPSend() (*model.OTPSendResp, error) {
 		}()).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
-		SetResult(&response).
 		Get(o.url + "/v1/auth/xyp/otpsend")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
-		return nil, fmt.Errorf("%s-Golomt CG statement response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
+		return nil, fmt.Errorf("%s-Golomt CG auth response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
 	return parseEncryptedResponse[*model.OTPSendResp](response, o.DecryptAESCBC)
 }
@@ -299,18 +303,18 @@ func (o *openbank) XypOTPVerify(body model.OTPXypVerifyReq) (*model.OTPVerifyRes
 			return checksum
 		}()).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
-		SetBody(body).
-		SetResult(&response).
-		Post(o.url + "/v1/auth/xyp/otp")
+		SetBody(bodyReader(body)).
+		Post(o.url + "/v1/auth/authorize/xyp/otp")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
-		return nil, fmt.Errorf("%s-Golomt CG statement response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
+		return nil, fmt.Errorf("%s-Golomt CG auth response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
 	return parseEncryptedResponse[*model.OTPVerifyResp](response, o.DecryptAESCBC)
 }
@@ -336,21 +340,21 @@ func (o *openbank) DigitalSignature() (*model.DigitalSignatureResp, error) {
 		}()).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetQueryParams(map[string]string{
-			"clientId": o.clientID,
-			"state":    o.state,
-			"scope":    o.scope,
+			"client_id": o.clientID,
+			"state":     o.state,
+			"scope":     o.scope,
 		}).
-		SetResult(&response).
 		Get(o.url + "/v1/auth/authorize/signature")
 	if err != nil {
 		return nil, err
 	}
+	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
 		if err != nil {
 			return nil, err
 		}
-		return nil, fmt.Errorf("%s-Golomt CG statement response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
+		return nil, fmt.Errorf("%s-Golomt CG auth response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
 	return parseEncryptedResponse[*model.DigitalSignatureResp](response, o.DecryptAESCBC)
 }
