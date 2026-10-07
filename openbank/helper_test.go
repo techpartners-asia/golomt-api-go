@@ -1,6 +1,7 @@
 package openbank
 
 import (
+	"encoding/json"
 	"errors"
 	"strings"
 	"testing"
@@ -32,5 +33,16 @@ func TestParseEncryptedResponseErrorShowsBody(t *testing.T) {
 	_, err := parseEncryptedResponse[*model.ServiceListResp]([]byte("Forbidden"), decrypt)
 	if err == nil || !strings.Contains(err.Error(), "Forbidden") {
 		t.Fatalf("err = %v, want it to include the body", err)
+	}
+}
+
+func TestServiceListReqIsFlat(t *testing.T) {
+	b, err := json.Marshal(model.ServiceListReq{RegisterNo: "1234", Services: []string{"ACCTBALINQ"}, Code: "ACCTBALINQ"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `{"registerNo":"1234","services":["ACCTBALINQ"],"code":"ACCTBALINQ"}`
+	if string(b) != want {
+		t.Fatalf("got %s, want %s", b, want)
 	}
 }
