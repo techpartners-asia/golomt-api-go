@@ -1,6 +1,7 @@
 package openbank
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -9,28 +10,63 @@ import (
 )
 
 // 5.1.	Дансны үлдэгдэл
+//
+// SPEC 5 (алхам 2-7) ба 4.3: эхний хүсэлт client_id/state/scope хоосон явна,
+// банк OAuth хариу (clientId, state, scope) буцаана; тэдгээрийг ашиглаж
+// хүсэлтийг дахин илгээхэд үлдэгдэл ирнэ. Хариунд url ирвэл харилцагч
+// банкны хуудсаар баталгаажуулах шаардлагатай тул алдаа буцаана.
 func (o *openbank) AccountBalcInq(body model.AccountBalcInqReq) (*model.AccountBalcInqResp, error) {
 	if err := o.auth(); err != nil {
 		return nil, err
 	}
+	plain, err := o.postAccountBalance(body)
+	if err != nil {
+		return nil, err
+	}
+	if grant, ok := oauthGrant(plain); ok {
+		if grant.State == "" || grant.Scope == "" {
+			if grant.Url != "" {
+				return nil, fmt.Errorf("%s-Golomt CG account balance inq: харилцагчийн баталгаажуулалт шаардлагатай: %s", time.Now().Format("20060102150405"), grant.Url)
+			}
+			return nil, fmt.Errorf("%s-Golomt CG account balance inq: OAuth хариунд state/scope алга: %s", time.Now().Format("20060102150405"), truncate(plain, 300))
+		}
+		o.SetOAuthResponse(*grant)
+		if plain, err = o.postAccountBalance(body); err != nil {
+			return nil, err
+		}
+		if _, again := oauthGrant(plain); again {
+			return nil, fmt.Errorf("%s-Golomt CG account balance inq: state/scope хүлээн авагдсангүй: %s", time.Now().Format("20060102150405"), truncate(plain, 300))
+		}
+	}
+	var result *model.AccountBalcInqResp
+	if err := json.Unmarshal(plain, &result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
 
+// postAccountBalance sends one ACCTBALINQ request and returns the decrypted
+// JSON body. Until a grant is held, client_id/state/scope go out empty, as
+// in the bank's Postman and Go examples.
+func (o *openbank) postAccountBalance(body model.AccountBalcInqReq) ([]byte, error) {
+	clientID := o.clientID
+	if o.state == "" {
+		clientID = ""
+	}
+	checksum, err := o.bodyChecksum(body)
+	if err != nil {
+		return nil, err
+	}
 	client := resty.New()
 	defer client.Close()
-	var response []byte
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "ACCTBALINQ").
-		SetHeader("X-Golomt-Checksum", func() string {
-			checksum, err := o.bodyChecksum(body)
-			if err != nil {
-				return ""
-			}
-			return checksum
-		}()).
+		SetHeader("X-Golomt-Checksum", checksum).
 		SetHeader("Authorization", "Bearer "+o.authObject.Token).
 		SetBody(bodyReader(body)).
 		SetQueryParams(map[string]string{
-			"client_id": o.clientID,
+			"client_id": clientID,
 			"state":     o.state,
 			"scope":     o.scope,
 		}).
@@ -38,15 +74,15 @@ func (o *openbank) AccountBalcInq(body model.AccountBalcInqReq) (*model.AccountB
 	if err != nil {
 		return nil, err
 	}
-	response = res.Bytes()
+	response := res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
-		if err != nil {
-			return nil, err
+		if err != nil || errResp == nil {
+			return nil, fmt.Errorf("%s-Golomt CG account balance inq response: http %d: %s", time.Now().Format("20060102150405"), res.StatusCode(), truncate(response, 300))
 		}
 		return nil, fmt.Errorf("%s-Golomt CG account balance inq response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseEncryptedResponse[*model.AccountBalcInqResp](response, o.DecryptAESCBC)
+	return decodeBody(response, o.DecryptAESCBC)
 }
 
 // 5.2.	Дансны төрөл шалгах

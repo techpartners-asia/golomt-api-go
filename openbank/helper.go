@@ -119,19 +119,47 @@ func (o openbank) bodyChecksum(body interface{}) (string, error) {
 
 func parseEncryptedResponse[T any](response []byte, decryptFunc func(string) (string, error)) (T, error) {
 	var result T
-	// Some replies (gateway errors, BSRVACC) arrive as plain JSON rather than
-	// AES/Base64; decrypting those fails with "illegal base64 data" and hides
-	// the bank's message.
-	if trimmed := bytes.TrimSpace(response); len(trimmed) > 0 && (trimmed[0] == '{' || trimmed[0] == '[') {
-		err := json.Unmarshal(trimmed, &result)
+	plain, err := decodeBody(response, decryptFunc)
+	if err != nil {
 		return result, err
+	}
+	err = json.Unmarshal(plain, &result)
+	return result, err
+}
+
+// decodeBody returns the JSON of a response body. Some replies (gateway
+// errors, BSRVACC) arrive as plain JSON rather than AES/Base64; Base64 never
+// starts with { or [, so those are passed through instead of failing with
+// "illegal base64 data" and hiding the bank's message.
+func decodeBody(response []byte, decryptFunc func(string) (string, error)) ([]byte, error) {
+	if trimmed := bytes.TrimSpace(response); len(trimmed) > 0 && (trimmed[0] == '{' || trimmed[0] == '[') {
+		return trimmed, nil
 	}
 	responseData, err := decryptFunc(string(response))
 	if err != nil {
-		return result, fmt.Errorf("decrypt response: %w: %s", err, truncate(response, 300))
+		return nil, fmt.Errorf("decrypt response: %w: %s", err, truncate(response, 300))
 	}
-	err = json.Unmarshal([]byte(responseData), &result)
-	return result, err
+	return []byte(responseData), nil
+}
+
+// oauthGrant reports whether body is a SPEC 4.3 OAuth reply (clientId /
+// state / scope / url) rather than the service's data.
+func oauthGrant(body []byte) (*model.OAuthResp, bool) {
+	var probe map[string]json.RawMessage
+	if json.Unmarshal(body, &probe) != nil {
+		return nil, false
+	}
+	_, hasState := probe["state"]
+	_, hasScope := probe["scope"]
+	_, hasType := probe["responseType"]
+	if !hasState && !hasScope && !hasType {
+		return nil, false
+	}
+	var grant model.OAuthResp
+	if json.Unmarshal(body, &grant) != nil {
+		return nil, false
+	}
+	return &grant, true
 }
 
 func parseResponse[T any](response []byte) (T, error) {
