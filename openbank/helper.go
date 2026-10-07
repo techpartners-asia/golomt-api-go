@@ -119,9 +119,16 @@ func (o openbank) bodyChecksum(body interface{}) (string, error) {
 
 func parseEncryptedResponse[T any](response []byte, decryptFunc func(string) (string, error)) (T, error) {
 	var result T
+	// Some replies (gateway errors, BSRVACC) arrive as plain JSON rather than
+	// AES/Base64; decrypting those fails with "illegal base64 data" and hides
+	// the bank's message.
+	if trimmed := bytes.TrimSpace(response); len(trimmed) > 0 && (trimmed[0] == '{' || trimmed[0] == '[') {
+		err := json.Unmarshal(trimmed, &result)
+		return result, err
+	}
 	responseData, err := decryptFunc(string(response))
 	if err != nil {
-		return result, err
+		return result, fmt.Errorf("decrypt response: %w: %s", err, truncate(response, 300))
 	}
 	err = json.Unmarshal([]byte(responseData), &result)
 	return result, err
@@ -258,4 +265,12 @@ func postPlain[T any](o *openbank, service, path string, body interface{}) (T, e
 		return result, fmt.Errorf("%s-Golomt CG %s response: %s: %s", time.Now().Format("20060102150405"), service, errResp.Message, errResp.DebugMessage)
 	}
 	return parseResponse[T](response)
+}
+
+// truncate returns at most n bytes of b for error messages.
+func truncate(b []byte, n int) string {
+	if len(b) <= n {
+		return string(b)
+	}
+	return string(b[:n]) + "..."
 }

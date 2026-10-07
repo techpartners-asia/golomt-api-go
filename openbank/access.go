@@ -113,12 +113,20 @@ func (o *openbank) ServicesAccess(body model.ServiceListReq) (*model.ServiceList
 	response = res.Bytes()
 	if res.StatusCode() != 200 {
 		errResp, err := parseEncryptedResponse[*model.ErrorResp](response, o.DecryptAESCBC)
-		if err != nil {
-			return nil, err
+		if err != nil || errResp == nil {
+			return nil, fmt.Errorf("%s-Golomt CG BSRVACC response: http %d: %s", time.Now().Format("20060102150405"), res.StatusCode(), truncate(response, 300))
 		}
-		return nil, fmt.Errorf("%s-Golomt CG auth response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
+		return nil, fmt.Errorf("%s-Golomt CG BSRVACC response: %s: %s", time.Now().Format("20060102150405"), errResp.Message, errResp.DebugMessage)
 	}
-	return parseEncryptedResponse[*model.ServiceListResp](response, o.DecryptAESCBC)
+	result, err := parseEncryptedResponse[*model.ServiceListResp](response, o.DecryptAESCBC)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil || (result.State == "" && result.Scope == "") {
+		// A 200 without a grant is the bank refusing in its own words; return them.
+		return nil, fmt.Errorf("%s-Golomt CG BSRVACC response: no state/scope: %s", time.Now().Format("20060102150405"), truncate(response, 300))
+	}
+	return result, nil
 }
 
 // 4.5.	Бүртгэлтэй дугаар татах
