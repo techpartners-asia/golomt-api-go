@@ -1,6 +1,6 @@
 module github.com/techpartners-asia/golomt-api-go
 
-go 1.27.0
+go 1.26
 
 require resty.dev/v3 v3.0.0-rc.3
 
