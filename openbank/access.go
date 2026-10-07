@@ -28,7 +28,7 @@ func (o *openbank) auth() error {
 	// 	if err != nil {
 	// 		return err
 	// 	}
-	// 	if res.IsStatusFailure() {
+	// 	if res.StatusCode() > 399 {
 	// 		return fmt.Errorf("%s-Golomt CG auth response: %s", time.Now().Format("20060102150405"), errResp.Message)
 	// 	}
 	// 	o.authObject = response
@@ -54,20 +54,21 @@ func (o *openbank) auth() error {
 	client := resty.New()
 	defer client.Close()
 	var response *model.AuthResp
-	var errResp *model.ErrorResp
 	res, err := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetHeader("X-Golomt-Service", "LGIN").
 		SetBody(request).
 		SetResult(&response).
-		SetResultError(&errResp).
 		Post(o.url + "/v1/auth/login")
 	if err != nil {
 		return err
 	}
-	if res.IsStatusFailure() {
+	if res.StatusCode() > 399 {
+		// The error body is parsed by hand rather than with SetError /
+		// SetResultError: resty renamed that method between v3 beta and rc,
+		// and this module must build against both.
 		msg := ""
-		if errResp != nil {
+		if errResp, perr := parseResponse[*model.ErrorResp](res.Bytes()); perr == nil && errResp != nil {
 			msg = errResp.Message
 		}
 		if msg == "" {
