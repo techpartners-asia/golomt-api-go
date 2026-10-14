@@ -26,6 +26,10 @@ type (
 		Particulars string `json:"particulars" validate:"required"`
 		// Гүйлгээний дүн агуулсан объект
 		Amount AmountDetail `json:"amount" validate:"required"`
+		// Дансны банкны код. Лавлах төрөл: BANK (Голомт банк - 15).
+		// CGWTXNADD (/v1/transaction/cgw/transfer) initiator.bank,
+		// receives[].bank-д заавал.
+		Bank string `json:"bank,omitempty"`
 	}
 
 	TransactionResp struct {
